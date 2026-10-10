@@ -25,9 +25,9 @@
 
   const words = ['创造', '探索', '连接', '想象', '实现', '玩', 'AI', '灵感'];
 
-  const GRAVITY_RADIUS = 200;
-  const GRAVITY_STRENGTH = 0.8;
-  const COLLISION_RADIUS = 40;
+  const GRAVITY_RADIUS = 130;
+  const GRAVITY_STRENGTH = 0.6;
+  const COLLISION_RADIUS = 25;
   const BOUNCE = 0.9;
 
   function resize() {
@@ -417,54 +417,56 @@
     const cx = mouse.x, cy = mouse.y;
     const t = time * 0.06;
 
-    // 龙卷风参数
-    const tornadoHeight = 100;  // 龙卷风高度
-    const bottomRadius = 55;    // 底部宽口半径
-    const topRadius = 8;        // 顶部窄口半径
-    const arms = 5;             // 螺旋臂数量
+    // 龙卷风参数：尖朝下的倒漏斗
+    const tornadoHeight = 70;   // 总高度
+    const topRadius = 38;       // 顶部宽口
+    const bottomRadius = 4;     // 底部尖端
+    const arms = 4;             // 螺旋臂数量
+    const topY = cy - tornadoHeight * 0.3;  // 顶部位置
+    const bottomY = cy + tornadoHeight * 0.7; // 底部尖端位置
 
-    // 漏斗半透明填充（龙卷风主体）
+    // 漏斗半透明主体（倒三角渐变）
     ctx.save();
-    ctx.globalAlpha = 0.08;
-    const funnelGrad = ctx.createLinearGradient(cx, cy - tornadoHeight, cx, cy + 20);
+    ctx.globalAlpha = 0.1;
+    const funnelGrad = ctx.createLinearGradient(cx, topY, cx, bottomY);
     funnelGrad.addColorStop(0, '#4361EE');
     funnelGrad.addColorStop(0.5, '#FF6B35');
     funnelGrad.addColorStop(1, '#06D6A0');
     ctx.fillStyle = funnelGrad;
     ctx.beginPath();
-    // 画漏斗形状（左边缘）
-    ctx.moveTo(cx - bottomRadius, cy + 15);
-    ctx.quadraticCurveTo(cx - bottomRadius * 0.6, cy - tornadoHeight * 0.4, cx - topRadius, cy - tornadoHeight);
-    // 顶部
-    ctx.lineTo(cx + topRadius, cy - tornadoHeight);
-    // 右边缘
-    ctx.quadraticCurveTo(cx + bottomRadius * 0.6, cy - tornadoHeight * 0.4, cx + bottomRadius, cy + 15);
-    // 底部椭圆
-    ctx.ellipse(cx, cy + 15, bottomRadius, bottomRadius * 0.25, 0, 0, Math.PI, true);
+    // 顶部宽口椭圆
+    ctx.ellipse(cx, topY, topRadius, topRadius * 0.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 倒漏斗主体
+    ctx.beginPath();
+    ctx.moveTo(cx - topRadius, topY);
+    ctx.quadraticCurveTo(cx - topRadius * 0.4, (topY + bottomY) / 2, cx - bottomRadius, bottomY);
+    ctx.lineTo(cx + bottomRadius, bottomY);
+    ctx.quadraticCurveTo(cx + topRadius * 0.4, (topY + bottomY) / 2, cx + topRadius, topY);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
-    // 多条螺旋气流线（绕漏斗表面旋转上升）
+    // 螺旋气流线：从顶部宽口旋转向下收窄
     for (let arm = 0; arm < arms; arm++) {
       const armOffset = (arm / arms) * Math.PI * 2;
       const armColor = colors[arm % colors.length];
       ctx.save();
       ctx.strokeStyle = armColor;
-      ctx.lineWidth = 1.8;
-      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.5;
       ctx.shadowColor = armColor;
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = 5;
       ctx.beginPath();
-      for (let i = 0; i <= 80; i++) {
-        const progress = i / 80; // 0=底部, 1=顶部
-        // 漏斗半径：底部大，向上逐渐缩小
-        const radius = bottomRadius * (1 - progress) + topRadius * progress;
-        // 旋转：越往上转得越快（角动量守恒）
-        const angle = t * (1 + progress * 2) + armOffset + progress * Math.PI * 4;
-        const y = cy + 15 - progress * (tornadoHeight + 15);
+      for (let i = 0; i <= 70; i++) {
+        const progress = i / 70; // 0=顶部, 1=底部尖端
+        // 半径：顶部大，向下逐渐收窄
+        const radius = topRadius * (1 - progress) + bottomRadius * progress;
+        // 旋转：越往下转越快
+        const angle = t * (1 + progress * 1.5) + armOffset + progress * Math.PI * 3;
+        const y = topY + progress * (bottomY - topY);
         const x = cx + Math.cos(angle) * radius;
-        const ellipseY = Math.sin(angle) * radius * 0.3; // 压扁成椭圆透视
+        const ellipseY = Math.sin(angle) * radius * 0.3;
         if (i === 0) ctx.moveTo(x, y + ellipseY);
         else ctx.lineTo(x, y + ellipseY);
       }
@@ -472,72 +474,53 @@
       ctx.restore();
     }
 
-    // 底部吸入漩涡（宽口椭圆）
+    // 顶部宽口旋转环
     ctx.save();
-    ctx.translate(cx, cy + 15);
-    ctx.rotate(-t * 0.6);
+    ctx.translate(cx, topY);
+    ctx.rotate(t * 0.8);
     ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.2;
     ctx.globalAlpha = 0.3;
     ctx.beginPath();
-    for (let i = 0; i <= 50; i++) {
-      const progress = i / 50;
-      const angle = progress * Math.PI * 2.5;
-      const r = 8 + progress * (bottomRadius - 8);
-      const x = Math.cos(angle) * r;
-      const y = Math.sin(angle) * r * 0.28;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
+    ctx.ellipse(0, 0, topRadius, topRadius * 0.3, 0, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
 
-    // 风眼（中心黑点+强发光）
+    // 底部尖端（风眼）
     ctx.save();
     ctx.fillStyle = '#1a1a2e';
     ctx.shadowColor = '#FF6B35';
-    ctx.shadowBlur = 30;
+    ctx.shadowBlur = 20;
     ctx.beginPath();
-    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.arc(cx, bottomY, 3.5, 0, Math.PI * 2);
     ctx.fill();
-    // 风眼内环
-    ctx.strokeStyle = '#FF6B35';
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.8;
-    ctx.beginPath();
-    ctx.arc(cx, cy, COLLISION_RADIUS * 0.5, 0, Math.PI * 2);
-    ctx.stroke();
     ctx.restore();
 
-    // 顶部云团（龙卷风顶端）
+    // 尖端小光环
     ctx.save();
-    ctx.globalAlpha = 0.15;
-    ctx.fillStyle = '#4361EE';
-    for (let i = 0; i < 5; i++) {
-      const cloudAngle = t * 0.5 + (i / 5) * Math.PI * 2;
-      const cloudR = 15 + Math.sin(t + i) * 5;
-      ctx.beginPath();
-      ctx.arc(
-        cx + Math.cos(cloudAngle) * cloudR,
-        cy - tornadoHeight + Math.sin(cloudAngle) * cloudR * 0.4,
-        10 + Math.sin(t * 2 + i) * 3,
-        0, Math.PI * 2
-      );
-      ctx.fill();
-    }
+    ctx.translate(cx, bottomY);
+    ctx.rotate(t * 2);
+    ctx.strokeStyle = '#FF6B35';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, Math.PI * 1.5);
+    ctx.stroke();
+    ctx.setLineDash([]);
     ctx.restore();
 
-    // 鼠标拖尾（螺旋上升的小粒子）
+    // 鼠标拖尾（细小上升粒子）
     cursorTrail.forEach((pos, i) => {
-      const alpha = (i / cursorTrail.length) * 0.25;
-      const size = (i / cursorTrail.length) * 8 + 1;
+      const alpha = (i / cursorTrail.length) * 0.2;
+      const size = (i / cursorTrail.length) * 4 + 0.5;
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.fillStyle = '#FF6B35';
       ctx.shadowColor = '#FF6B35';
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 3;
       ctx.beginPath();
-      ctx.arc(pos.x + Math.sin(time * 0.1 + i) * 5, pos.y - i * 3, size, 0, Math.PI * 2);
+      ctx.arc(pos.x + Math.sin(time * 0.15 + i) * 3, pos.y - i * 2, size, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     });
