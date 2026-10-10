@@ -57,36 +57,46 @@
     }
 
     update() {
-      // === 鼠标引力 ===
+      // === 鼠标龙卷风 ===
       if (mouse.active) {
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < GRAVITY_RADIUS && dist > 0) {
-          // 引力：越近越强
           const force = GRAVITY_STRENGTH * (1 - dist / GRAVITY_RADIUS);
           const angle = Math.atan2(dy, dx);
-          this.vx += Math.cos(angle) * force * 0.15;
-          this.vy += Math.sin(angle) * force * 0.15;
 
-          // 切向力（产生漩涡效果）
+          // 弱引力（把粒子拉向龙卷风范围）
+          this.vx += Math.cos(angle) * force * 0.08;
+          this.vy += Math.sin(angle) * force * 0.08;
+
+          // 强切向力（高速旋转 = 龙卷风主体）
           const tangentAngle = angle + Math.PI / 2;
-          const swirlForce = force * 0.3;
+          const swirlForce = force * 1.8;
           this.vx += Math.cos(tangentAngle) * swirlForce;
           this.vy += Math.sin(tangentAngle) * swirlForce;
+
+          // 上升气流（粒子被吸上去，越近越强）
+          const liftForce = force * 0.6 * (1 - dist / GRAVITY_RADIUS);
+          this.vy -= liftForce;
+
+          // 漏斗收缩：靠近中心时径向向内挤压
+          if (dist < GRAVITY_RADIUS * 0.5) {
+            const squeeze = (1 - dist / (GRAVITY_RADIUS * 0.5)) * 0.15;
+            this.vx += Math.cos(angle) * squeeze;
+            this.vy += Math.sin(angle) * squeeze;
+          }
         }
 
-        // === 碰撞 ===
+        // === 风眼碰撞（中心弹开） ===
         if (dist < COLLISION_RADIUS + this.size && dist > 0) {
           const angle = Math.atan2(dy, dx);
-          // 弹开
-          const bounceForce = (COLLISION_RADIUS + this.size - dist) * 0.3;
+          const bounceForce = (COLLISION_RADIUS + this.size - dist) * 0.4;
           this.vx -= Math.cos(angle) * bounceForce;
           this.vy -= Math.sin(angle) * bounceForce;
-          // 加入鼠标速度
-          this.vx += mouse.vx * 0.3;
-          this.vy += mouse.vy * 0.3;
+          this.vx += mouse.vx * 0.2;
+          this.vy += mouse.vy * 0.2;
         }
       }
 
@@ -136,7 +146,7 @@
 
       // 限制最大速度
       const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-      const maxSpeed = 8;
+      const maxSpeed = 14;
       if (speed > maxSpeed) {
         this.vx = (this.vx / speed) * maxSpeed;
         this.vy = (this.vy / speed) * maxSpeed;
@@ -266,62 +276,102 @@
   function drawCursor() {
     if (!mouse.active) return;
 
-    // 鼠标拖尾
-    cursorTrail.forEach((pos, i) => {
-      const alpha = (i / cursorTrail.length) * 0.3;
-      const size = (i / cursorTrail.length) * 20;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = '#1a1a2e';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    });
+    const cx = mouse.x, cy = mouse.y;
+    const t = time * 0.05;
 
-    // 引力场范围（淡圈）
+    // 龙卷风范围（淡底）
     ctx.save();
-    ctx.globalAlpha = 0.08;
-    ctx.fillStyle = '#1a1a2e';
+    ctx.globalAlpha = 0.06;
+    const tornadoGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, GRAVITY_RADIUS);
+    tornadoGrad.addColorStop(0, '#FF6B35');
+    tornadoGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = tornadoGrad;
     ctx.beginPath();
-    ctx.arc(mouse.x, mouse.y, GRAVITY_RADIUS, 0, Math.PI * 2);
+    ctx.arc(cx, cy, GRAVITY_RADIUS, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // 碰撞体（外圈）
+    // 螺旋气流线（3条，旋转上升）
+    for (let arm = 0; arm < 3; arm++) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(t + arm * (Math.PI * 2 / 3));
+      ctx.strokeStyle = arm === 0 ? '#FF6B35' : (arm === 1 ? '#4361EE' : '#06D6A0');
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      // 螺旋线：从中心向外，同时向上
+      for (let i = 0; i <= 60; i++) {
+        const progress = i / 60;
+        const angle = progress * Math.PI * 3; // 转1.5圈
+        const radius = progress * 70; // 从中心向外扩大
+        const lift = -progress * 50; // 向上
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius * 0.4 + lift; // 压扁成漏斗
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 风眼（中心黑点+发光）
     ctx.save();
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.6;
-    ctx.setLineDash([6, 4]);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.shadowColor = '#FF6B35';
+    ctx.shadowBlur = 25;
     ctx.beginPath();
-    ctx.arc(mouse.x, mouse.y, COLLISION_RADIUS, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 风眼外环（快速旋转）
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(t * 3);
+    ctx.strokeStyle = '#FF6B35';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.8;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.arc(0, 0, COLLISION_RADIUS, 0, Math.PI * 2);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.restore();
 
-    // 核心点
+    // 底部吸入漩涡（宽底）
     ctx.save();
-    ctx.fillStyle = '#1a1a2e';
-    ctx.shadowColor = '#FF6B35';
-    ctx.shadowBlur = 20;
+    ctx.translate(cx, cy + 30);
+    ctx.rotate(-t * 0.8);
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.25;
     ctx.beginPath();
-    ctx.arc(mouse.x, mouse.y, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    // 旋转环
-    ctx.save();
-    ctx.translate(mouse.x, mouse.y);
-    ctx.rotate(time * 0.02);
-    ctx.strokeStyle = '#FF6B35';
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.arc(0, 0, 25, 0, Math.PI * 1.5);
+    for (let i = 0; i <= 40; i++) {
+      const progress = i / 40;
+      const angle = progress * Math.PI * 2;
+      const radius = 15 + progress * 55;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius * 0.3;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
     ctx.stroke();
     ctx.restore();
+
+    // 鼠标拖尾（螺旋状）
+    cursorTrail.forEach((pos, i) => {
+      const alpha = (i / cursorTrail.length) * 0.2;
+      const size = (i / cursorTrail.length) * 15;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = '#FF6B35';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y - i * 2, size, 0, Math.PI * 1.5);
+      ctx.stroke();
+      ctx.restore();
+    });
   }
 
   function animate() {
