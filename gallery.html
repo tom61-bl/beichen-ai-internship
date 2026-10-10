@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>成果探索 | 北辰青年 AI 实习第四期</title>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>北辰 AI 实习</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="gallery.html" class="nav-link">成果探索</a>
+        <a href="about-program.html" class="nav-link">活动介绍</a>
+        <a href="about-us.html" class="nav-link">关于北辰</a>
+        <a href="apply.html" class="btn btn-primary nav-cta">立即报名</a>
+      </div>
+      <div class="nav-toggle"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+  <div class="nav-mobile">
+    <a href="index.html" class="nav-mobile-link">首页</a>
+    <a href="gallery.html" class="nav-mobile-link">成果探索</a>
+    <a href="about-program.html" class="nav-mobile-link">活动介绍</a>
+    <a href="about-us.html" class="nav-mobile-link">关于北辰</a>
+    <a href="apply.html" class="btn btn-primary" style="text-align:center;margin-top:16px;">立即报名</a>
+  </div>
+
+  <main class="main">
+
+    <section class="page-header">
+      <div class="container">
+        <span class="page-header-badge">成果探索</span>
+        <h1 class="page-header-title">看看大家<br>都做出了什么</h1>
+        <p class="page-header-subtitle">来自往期学员的真实 AI 作品。按主题筛选，找到和你兴趣匹配的创作。</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="container">
+
+        <!-- 筛选标签 -->
+        <div class="gallery-filters">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="discover">认识 AI</button>
+          <button class="filter-btn" data-filter="create">使用 AI</button>
+          <button class="filter-btn" data-filter="collab">共创 AI</button>
+        </div>
+
+        <!-- 作品网格（当前为空，展示空状态） -->
+        <div class="gallery-grid">
+          <div class="gallery-empty">
+            <div class="gallery-empty-icon">🎨</div>
+            <h3 class="gallery-empty-title">作品正在路上</h3>
+            <p class="gallery-empty-desc">第四期学员作品即将上线，敬请期待。<br>你也可以成为第一批创作者。</p>
+            <div style="margin-top:24px;">
+              <a href="apply.html" class="btn btn-brutal">我也要创作 →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 作品详情模板说明（隐藏，供后续填充参考） -->
+        <!--
+        <div class="work-card" data-category="discover">
+          <div class="work-card-cover">🔍</div>
+          <div class="work-card-body">
+            <h4 class="work-card-title">作品名称</h4>
+            <div class="work-card-meta">
+              <span>作者</span>
+              <span>认识 AI</span>
+            </div>
+          </div>
+        </div>
+        -->
+
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" style="background:var(--color-text);color:#fff;text-align:center;">
+      <div class="container reveal">
+        <h2 style="font-size:var(--text-3xl);margin-bottom:16px;color:#fff;">下一个作品<br>可以是你的</h2>
+        <p style="color:rgba(255,255,255,0.7);font-size:var(--text-lg);margin-bottom:32px;">加入北辰 AI 实习，把想法变成现实。</p>
+        <a href="apply.html" class="btn btn-brutal btn-lg" style="background:var(--color-accent);">立即报名 →</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <h3>北辰青年 AI 实习</h3>
+          <p>让更多年轻人接触 AI、使用 AI、创造 AI。</p>
+        </div>
+        <div class="footer-col">
+          <h4>探索</h4>
+          <a href="discover.html">认识 AI</a>
+          <a href="create.html">使用 AI</a>
+          <a href="collab.html">共创 AI</a>
+          <a href="gallery.html">成果库</a>
+        </div>
+        <div class="footer-col">
+          <h4>了解</h4>
+          <a href="about-program.html">活动介绍</a>
+          <a href="about-program.html#faq">常见问题</a>
+          <a href="about-us.html">关于北辰</a>
+        </div>
+        <div class="footer-col">
+          <h4>参与</h4>
+          <a href="apply.html">立即报名</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 北辰青年 · AI 实习第四期</span>
+        <span>用 AI 创造有意思的东西</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/filter.js"></script>
+</body>
+</html>
