@@ -3,11 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>北辰青年 AI 实习第四期 | 用 AI 创造有意思的东西</title>
-  <meta name="description" content="北辰青年 AI 实习第四期招募中。零基础探索 AI，用 AI 做出自己的作品，和伙伴一起共创。">
+  <title>北辰青年 AI 实习第四期 | 来玩点 AI</title>
+  <meta name="description" content="北辰青年 AI 实习第四期。来 AI 实验室玩一玩，30秒做出你的第一个作品。">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
+  <style>
+    /* V3 首屏粒子 */
+    .hero-v3 {
+      position: relative;
+      height: calc(100vh - var(--nav-height));
+      min-height: 600px;
+      overflow: hidden;
+    }
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+      padding: 0 24px;
+    }
+    .hero-label {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #1a1a2e;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      border: 2px solid #1a1a2e;
+      padding: 8px 20px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+      pointer-events: auto;
+    }
+    .hero-title {
+      font-size: clamp(48px, 9vw, 110px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+      pointer-events: auto;
+    }
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(135deg, #4361EE, #FF6B35, #06D6A0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: clamp(16px, 2vw, 20px);
+      color: #555;
+      max-width: 500px;
+      margin-bottom: 32px;
+      line-height: 1.7;
+      pointer-events: auto;
+    }
+    .hero-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      color: #999;
+      z-index: 10;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* 实验室入口 */
+    .labs-section {
+      padding: 100px 0;
+      background: #fff;
+    }
+    .labs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .lab-card {
+      position: relative;
+      border: 3px solid #1a1a2e;
+      border-radius: 20px;
+      padding: 40px 32px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+    }
+    .lab-card:hover {
+      transform: translateY(-8px) rotate(-1deg);
+      box-shadow: 8px 8px 0 #1a1a2e;
+    }
+    .lab-card:nth-child(2):hover { transform: translateY(-8px) rotate(1deg); }
+    .lab-card-num {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      opacity: 0.5;
+    }
+    .lab-card-icon {
+      font-size: 56px;
+      margin: 16px 0;
+    }
+    .lab-card-title {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .lab-card-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .lab-card-cta {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lab-card-1 { background: linear-gradient(135deg, #E8EDFF, #fff); }
+    .lab-card-1 .lab-card-num { color: #4361EE; }
+    .lab-card-2 { background: linear-gradient(135deg, #FFF0E8, #fff); }
+    .lab-card-2 .lab-card-num { color: #FF6B35; }
+    .lab-card-3 { background: linear-gradient(135deg, #E6FFF7, #fff); }
+    .lab-card-3 .lab-card-num { color: #059669; }
+
+    .lab-card .deco {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    .lab-card-1 .deco {
+      width: 120px; height: 120px;
+      border: 3px solid #4361EE;
+      border-radius: 50%;
+      top: -30px; right: -30px;
+    }
+    .lab-card-2 .deco {
+      width: 100px; height: 100px;
+      border: 3px solid #FF6B35;
+      bottom: 20px; right: 20px;
+      transform: rotate(15deg);
+    }
+    .lab-card-3 .deco {
+      width: 80px; height: 80px;
+      background: #06D6A0;
+      border-radius: 50%;
+      top: 30px; right: 40px;
+      opacity: 0.2;
+    }
+
+    @media (max-width: 900px) {
+      .labs-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
@@ -35,164 +211,120 @@
 
   <main class="main">
 
-    <!-- 首页轮播 V2 -->
-    <section class="hero">
-      <div class="carousel">
-        <div class="carousel-track">
+    <!-- V3 首屏：粒子交互 -->
+    <section class="hero-v3">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-content">
+        <span class="hero-label">北辰青年 AI 实习 · 第四期</span>
+        <h1 class="hero-title">
+          来，玩点
+          <span class="line2">AI</span>
+        </h1>
+        <p class="hero-desc">
+          不用报名，不用安装。打开就能玩，30秒做出你的第一个 AI 作品。
+        </p>
+        <a href="#labs" class="btn btn-brutal btn-lg" style="pointer-events:auto;">
+          开始体验 ↓
+        </a>
+      </div>
+      <div class="hero-hint">移动鼠标 / 点击屏幕 试试 ✨</div>
+    </section>
 
-          <!-- Slide 1: 认识 AI -->
-          <div class="carousel-slide slide-discover">
-            <div class="deco-1"></div>
-            <div class="deco-2"></div>
-            <div class="deco-3"></div>
-            <div class="deco-question">?</div>
-            <div class="deco-dots">
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-            </div>
-            <div class="carousel-slide-inner">
-              <span class="slide-label">01 / 认识 AI</span>
-              <h1 class="slide-title">
-                AI 到底
-                <span class="line2">能干嘛？</span>
-                <span class="line3">What can AI do for me?</span>
-              </h1>
-              <p class="slide-desc">
-                从零基础开始，发现 AI 在学习、生活和创作中的无限可能。不需要代码，不限专业。
-              </p>
-              <a href="discover.html" class="btn btn-brutal btn-lg">开始探索 →</a>
-            </div>
-          </div>
-
-          <!-- Slide 2: 使用 AI -->
-          <div class="carousel-slide slide-create">
-            <div class="deco-grid">
-              <span></span><span></span><span></span>
-              <span></span><span></span><span></span>
-              <span></span><span></span><span></span>
-            </div>
-            <div class="deco-arrow">↗</div>
-            <div class="deco-bracket"></div>
-            <div class="deco-bracket-2"></div>
-            <div class="carousel-slide-inner">
-              <span class="slide-label">02 / 使用 AI</span>
-              <h1 class="slide-title">
-                把想法
-                <span class="line2">做出来。</span>
-                <span class="line3">BUILD IT</span>
-              </h1>
-              <p class="slide-desc">
-                做网站、做 Agent、做效率工具。从 0 到 1，拥有属于你自己的 AI 作品。
-              </p>
-              <a href="create.html" class="btn btn-brutal btn-lg">动手创造 →</a>
-            </div>
-          </div>
-
-          <!-- Slide 3: 共创 AI -->
-          <div class="carousel-slide slide-collab">
-            <div class="deco-network">
-              <svg viewBox="0 0 1000 700" preserveAspectRatio="none">
-                <line x1="100" y1="150" x2="320" y2="220" stroke="#059669" stroke-width="2"/>
-                <line x1="320" y1="220" x2="180" y2="450" stroke="#059669" stroke-width="2"/>
-                <line x1="180" y1="450" x2="380" y2="520" stroke="#059669" stroke-width="2"/>
-                <line x1="320" y1="220" x2="550" y2="340" stroke="#059669" stroke-width="2"/>
-                <line x1="550" y1="340" x2="380" y2="520" stroke="#059669" stroke-width="2"/>
-                <line x1="550" y1="340" x2="900" y2="180" stroke="#059669" stroke-width="2"/>
-                <line x1="550" y1="340" x2="820" y2="480" stroke="#059669" stroke-width="2"/>
-              </svg>
-              <span class="node n1"></span>
-              <span class="node n2"></span>
-              <span class="node n3"></span>
-              <span class="node n4"></span>
-              <span class="node n5"></span>
-              <span class="node n6"></span>
-              <span class="node big n7"></span>
-            </div>
-            <div class="deco-amp">&</div>
-            <div class="carousel-slide-inner">
-              <span class="slide-label">03 / 共创 AI</span>
-              <h1 class="slide-title">
-                一起
-                <span class="line2">搞点事情。</span>
-                <span class="line3">create together</span>
-              </h1>
-              <p class="slide-desc">
-                组队实践、跨界碰撞，在真实项目中找到志同道合的创作者。
-              </p>
-              <a href="collab.html" class="btn btn-brutal btn-lg">加入共创 →</a>
-            </div>
-          </div>
-
+    <!-- 三大实验室入口 -->
+    <section class="labs-section" id="labs">
+      <div class="container">
+        <div class="reveal">
+          <span class="page-header-badge">AI 实验室</span>
+          <h2 class="section-title">三个实验室，<span class="accent">随便玩</span></h2>
+          <p style="color:#666;font-size:17px;margin-top:12px;">每个都能在几分钟内产出属于你的东西。</p>
         </div>
 
-        <div class="carousel-controls">
-          <button class="carousel-arrow carousel-prev" aria-label="上一个">←</button>
-          <div class="carousel-dots">
-            <span class="carousel-dot active"></span>
-            <span class="carousel-dot"></span>
-            <span class="carousel-dot"></span>
-          </div>
-          <button class="carousel-arrow carousel-next" aria-label="下一个">→</button>
+        <div class="labs-grid">
+          <a href="labs/discover.html" class="lab-card lab-card-1 reveal">
+            <div class="deco"></div>
+            <div>
+              <div class="lab-card-num">LAB 01</div>
+              <div class="lab-card-icon">🔍</div>
+              <h3 class="lab-card-title">AI 灵感<br>生成器</h3>
+              <p class="lab-card-desc">输入一个词，AI 给你 5 个可以立刻试试的创意。看看 AI 能帮你做什么。</p>
+            </div>
+            <div class="lab-card-cta" style="color:#4361EE;">去玩玩 →</div>
+          </a>
+
+          <a href="labs/create.html" class="lab-card lab-card-2 reveal">
+            <div class="deco"></div>
+            <div>
+              <div class="lab-card-num">LAB 02</div>
+              <div class="lab-card-icon">⚡</div>
+              <h3 class="lab-card-title">30秒个人<br>主页生成器</h3>
+              <p class="lab-card-desc">填几个信息，选个风格，立刻拥有属于你的个人主页。这就是 AI 的速度。</p>
+            </div>
+            <div class="lab-card-cta" style="color:#FF6B35;">去玩玩 →</div>
+          </a>
+
+          <a href="gallery.html" class="lab-card lab-card-3 reveal">
+            <div class="deco"></div>
+            <div>
+              <div class="lab-card-num">LAB 03</div>
+              <div class="lab-card-icon">🎨</div>
+              <h3 class="lab-card-title">往期学员<br>作品墙</h3>
+              <p class="lab-card-desc">看看往期学员都做出了什么。个人主页、团队项目、AI 工具，应有尽有。</p>
+            </div>
+            <div class="lab-card-cta" style="color:#059669;">去看看 →</div>
+          </a>
         </div>
       </div>
     </section>
 
     <!-- 需求方向 -->
-    <section class="needs-section">
+    <section class="needs-section" style="background:#fafafa;">
       <div class="container">
         <div class="reveal">
           <span class="page-header-badge">你可能在想</span>
           <h2 class="section-title">找到<span class="accent">和你有关</span>的入口</h2>
-          <p style="color:#666;font-size:17px;margin-top:12px;">不管你是好奇宝宝、效率达人，还是想搞点事情的创作者，这里都有你的位置。</p>
         </div>
-
         <div class="needs-grid">
-          <a href="discover.html" class="need-card reveal">
+          <a href="labs/discover.html" class="need-card reveal">
             <span class="num">01</span>
             <div class="need-card-icon">🔍</div>
             <h3 class="need-card-title">不知道 AI 能干嘛</h3>
-            <p class="need-card-desc">从日常场景出发，看看 AI 能帮你解决什么问题。零基础友好。</p>
-            <span class="go">去看看 →</span>
+            <p class="need-card-desc">去灵感生成器，输入你在想的事，看看 AI 能给你什么。</p>
+            <span class="go">去试试 →</span>
           </a>
-
-          <a href="create.html" class="need-card reveal">
+          <a href="labs/create.html" class="need-card reveal">
             <span class="num">02</span>
             <div class="need-card-icon">⚡</div>
             <h3 class="need-card-title">想提升效率</h3>
-            <p class="need-card-desc">搭建自己的 AI 工作流，把重复的事交给机器，把时间留给创造。</p>
-            <span class="go">去看看 →</span>
+            <p class="need-card-desc">30秒做个个人主页，体验 AI 帮你干活的感觉。</p>
+            <span class="go">去试试 →</span>
           </a>
-
-          <a href="create.html" class="need-card reveal">
-            <span class="num">03</span>
-            <div class="need-card-icon">🛠️</div>
-            <h3 class="need-card-title">想做出自己的东西</h3>
-            <p class="need-card-desc">从一个想法开始，做出属于你的网站、Agent 或小作品。</p>
-            <span class="go">去看看 →</span>
-          </a>
-
           <a href="gallery.html" class="need-card reveal">
-            <span class="num">04</span>
+            <span class="num">03</span>
             <div class="need-card-icon">📁</div>
             <h3 class="need-card-title">想积累实践经历</h3>
-            <p class="need-card-desc">真实项目 + 作品展示，为你的简历和作品集添上硬核的一笔。</p>
+            <p class="need-card-desc">看看往期学员的作品，也许下一个就是你。</p>
             <span class="go">去看看 →</span>
           </a>
-
-          <a href="collab.html" class="need-card reveal">
-            <span class="num">05</span>
-            <div class="need-card-icon">🤝</div>
-            <h3 class="need-card-title">想找到同伴</h3>
-            <p class="need-card-desc">和一群有趣的人一起折腾，在合作中碰撞出意想不到的火花。</p>
-            <span class="go">去看看 →</span>
-          </a>
-
           <a href="about-program.html#faq" class="need-card reveal">
-            <span class="num">06</span>
+            <span class="num">04</span>
             <div class="need-card-icon">💡</div>
             <h3 class="need-card-title">担心学不会</h3>
-            <p class="need-card-desc">无需代码、不限专业。看看大家都在问什么，也许你的疑虑已有答案。</p>
+            <p class="need-card-desc">无需代码、不限专业。先玩玩实验室，你就知道没那么难。</p>
             <span class="go">去看看 →</span>
+          </a>
+          <a href="about-program.html" class="need-card reveal">
+            <span class="num">05</span>
+            <div class="need-card-icon">📋</div>
+            <h3 class="need-card-title">想了解项目详情</h3>
+            <p class="need-card-desc">活动介绍、参与流程、常见问题，都在这里。</p>
+            <span class="go">去看看 →</span>
+          </a>
+          <a href="apply.html" class="need-card reveal">
+            <span class="num">06</span>
+            <div class="need-card-icon">🚀</div>
+            <h3 class="need-card-title">已经心动了</h3>
+            <p class="need-card-desc">那就直接报名吧，和一群有趣的人一起玩 AI。</p>
+            <span class="go">去报名 →</span>
           </a>
         </div>
       </div>
@@ -202,9 +334,11 @@
     <section class="section" style="background:#1a1a2e;color:#fff;text-align:center;">
       <div class="container reveal">
         <h2 style="font-size:clamp(32px,5vw,56px);font-weight:900;line-height:1.1;margin-bottom:20px;color:#fff;">
-          一群有意思的年轻人<br>正在用 AI 创造有意思的东西
+          玩够了？<br>那就加入我们
         </h2>
-        <p style="color:rgba(255,255,255,0.6);font-size:18px;margin-bottom:32px;">邀请你一起来。</p>
+        <p style="color:rgba(255,255,255,0.6);font-size:18px;margin-bottom:32px;">
+          北辰青年 AI 实习第四期，和一群有意思的人一起创造。
+        </p>
         <a href="apply.html" class="btn btn-brutal btn-lg" style="background:#FF6B35;">立即报名 →</a>
       </div>
     </section>
@@ -219,11 +353,10 @@
           <p>让更多年轻人接触 AI、使用 AI、创造 AI。</p>
         </div>
         <div class="footer-col">
-          <h4>探索</h4>
-          <a href="discover.html">认识 AI</a>
-          <a href="create.html">使用 AI</a>
-          <a href="collab.html">共创 AI</a>
-          <a href="gallery.html">成果库</a>
+          <h4>实验室</h4>
+          <a href="labs/discover.html">灵感生成器</a>
+          <a href="labs/create.html">主页生成器</a>
+          <a href="gallery.html">作品墙</a>
         </div>
         <div class="footer-col">
           <h4>了解</h4>
@@ -244,6 +377,6 @@
   </footer>
 
   <script src="assets/js/main.js"></script>
-  <script src="assets/js/carousel.js"></script>
+  <script src="assets/js/particle-field.js"></script>
 </body>
 </html>

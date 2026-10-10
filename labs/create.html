@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>30秒个人主页生成器 | 北辰青年 AI 实习</title>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <style>
+    .lab-page {
+      min-height: 100vh;
+      padding-top: 80px;
+      background: linear-gradient(135deg, #FFF0E8 0%, #E8EDFF 50%, #E6FFF7 100%);
+    }
+    .lab-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .lab-header {
+      text-align: center; margin-bottom: 40px;
+    }
+    .lab-label {
+      display: inline-block;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.2em;
+      text-transform: uppercase; color: #FF6B35;
+      background: #FF6B35; color: #fff;
+      padding: 6px 16px; border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .lab-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -0.03em; margin-bottom: 12px;
+    }
+    .lab-title .accent { color: #FF6B35; }
+    .lab-subtitle {
+      font-size: 17px; color: #666;
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    .control-panel {
+      background: #fff;
+      border: 2px solid #1a1a2e;
+      border-radius: 16px;
+      padding: 28px;
+      position: sticky;
+      top: 90px;
+    }
+    .panel-title {
+      font-size: 18px; font-weight: 800;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #eee;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px; font-weight: 700;
+      margin-bottom: 8px; color: #333;
+    }
+    .form-input {
+      width: 100%; padding: 12px 16px;
+      border: 2px solid #ddd; border-radius: 8px;
+      font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: #FF6B35;
+    }
+    .form-textarea {
+      width: 100%; padding: 12px 16px;
+      border: 2px solid #ddd; border-radius: 8px;
+      font-size: 14px; font-family: inherit;
+      outline: none; resize: vertical;
+      min-height: 80px;
+    }
+    .form-textarea:focus { border-color: #FF6B35; }
+    .style-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .style-option {
+      aspect-ratio: 1;
+      border: 3px solid #ddd;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .style-option.active {
+      border-color: #1a1a2e;
+      transform: scale(1.05);
+    }
+    .style-option.active::after {
+      content: '✓';
+      position: absolute;
+      top: 4px; right: 6px;
+      font-size: 14px; font-weight: 900;
+      color: #1a1a2e;
+    }
+    .style-1 { background: linear-gradient(135deg, #4361EE, #7B2CBF); }
+    .style-2 { background: linear-gradient(135deg, #FF6B35, #F72585); }
+    .style-3 { background: linear-gradient(135deg, #06D6A0, #00B4D8); }
+    .style-4 { background: linear-gradient(135deg, #1a1a2e, #4a4a6a); }
+    .style-5 { background: linear-gradient(135deg, #FFD166, #FF6B35); }
+    .style-6 { background: linear-gradient(135deg, #F72585, #7B2CBF); }
+    .generate-btn {
+      width: 100%; padding: 16px;
+      background: #FF6B35; color: #fff;
+      border: 2px solid #1a1a2e; border-radius: 12px;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .generate-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 #1a1a2e;
+    }
+    .preview-panel {
+      background: #fff;
+      border: 2px solid #1a1a2e;
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 500px;
+    }
+    .preview-header {
+      padding: 12px 20px;
+      background: #f5f5f5;
+      border-bottom: 2px solid #eee;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .preview-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .preview-content {
+      padding: 0;
+      min-height: 460px;
+    }
+    /* 个人主页模板样式 */
+    .profile-page {
+      min-height: 460px;
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-page h2 {
+      font-size: 42px; font-weight: 900;
+      margin-bottom: 8px; line-height: 1.1;
+    }
+    .profile-page .tagline {
+      font-size: 16px; opacity: 0.8;
+      margin-bottom: 24px;
+    }
+    .profile-page .bio {
+      font-size: 15px; line-height: 1.8;
+      max-width: 500px; margin-bottom: 24px;
+    }
+    .profile-tags {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .profile-tag {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px; font-weight: 600;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+    }
+    .profile-deco {
+      position: absolute;
+      pointer-events: none;
+    }
+    /* 模板1: 渐变大字 */
+    .tpl-1 { background: linear-gradient(135deg, #4361EE, #7B2CBF); color: #fff; }
+    .tpl-1 h2 { font-size: 56px; }
+    .tpl-1 .deco-circle {
+      width: 200px; height: 200px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      top: -50px; right: -50px;
+    }
+    /* 模板2: 暖橙活力 */
+    .tpl-2 { background: linear-gradient(135deg, #FF6B35, #F72585); color: #fff; }
+    .tpl-2 h2 { font-style: italic; }
+    .tpl-2 .deco-square {
+      width: 150px; height: 150px;
+      border: 4px solid rgba(255,255,255,0.4);
+      bottom: 30px; right: 40px;
+      transform: rotate(15deg);
+    }
+    /* 模板3: 清新薄荷 */
+    .tpl-3 { background: linear-gradient(135deg, #06D6A0, #00B4D8); color: #fff; }
+    .tpl-3 .deco-wave {
+      bottom: 0; left: 0; right: 0;
+      height: 80px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50% 50% 0 0;
+    }
+    /* 模板4: 暗黑高级 */
+    .tpl-4 { background: linear-gradient(135deg, #1a1a2e, #4a4a6a); color: #fff; }
+    .tpl-4 h2 { font-size: 48px; letter-spacing: -0.02em; }
+    .tpl-4 .deco-grid {
+      top: 0; right: 0; bottom: 0;
+      width: 200px;
+      background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    /* 模板5: 暖阳黄 */
+    .tpl-5 { background: linear-gradient(135deg, #FFD166, #FF6B35); color: #1a1a2e; }
+    .tpl-5 h2 { font-size: 52px; }
+    .tpl-5 .deco-sun {
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+      top: 40px; right: 60px;
+    }
+    /* 模板6: 梦幻紫粉 */
+    .tpl-6 { background: linear-gradient(135deg, #F72585, #7B2CBF); color: #fff; }
+    .tpl-6 .deco-blob {
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      bottom: -40px; right: -40px;
+    }
+    .back-link {
+      position: fixed; top: 80px; left: 24px;
+      z-index: 100; padding: 8px 16px;
+      background: #fff; border: 2px solid #1a1a2e;
+      border-radius: 8px; font-size: 13px; font-weight: 600;
+      text-decoration: none; color: #1a1a2e;
+      transition: all 0.2s;
+    }
+    .back-link:hover { background: #1a1a2e; color: #fff; }
+    @media(max-width:900px) {
+      .workspace { grid-template-columns: 1fr; }
+      .control-panel { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="../index.html" class="back-link">← 返回</a>
+
+  <div class="lab-page">
+    <div class="lab-container">
+      <div class="lab-header">
+        <span class="lab-label">实验室 02 / 使用 AI</span>
+        <h1 class="lab-title">30秒做出你的<span class="accent">个人主页</span></h1>
+        <p class="lab-subtitle">填几个信息，选个风格，立刻拥有属于你的网站。这就是 AI 的力量。</p>
+      </div>
+
+      <div class="workspace">
+        <!-- 控制面板 -->
+        <div class="control-panel">
+          <div class="panel-title">✏️ 填写信息</div>
+
+          <div class="form-group">
+            <label class="form-label">你的名字</label>
+            <input type="text" class="form-input" id="nameInput" placeholder="比如：小明" value="小明">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">一句话标签</label>
+            <input type="text" class="form-input" id="taglineInput" placeholder="比如：正在探索世界的创作者" value="正在探索世界的创作者">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">关于我</label>
+            <textarea class="form-textarea" id="bioInput" placeholder="简单介绍一下自己...">一个对世界充满好奇的人，喜欢用 AI 创造有意思的东西。目前在学习如何把想法变成现实。</textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">兴趣标签（用逗号分隔）</label>
+            <input type="text" class="form-input" id="tagsInput" placeholder="比如：设计,摄影,旅行,AI" value="设计,摄影,旅行,AI">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">选择风格</label>
+            <div class="style-picker">
+              <div class="style-option style-1 active" data-tpl="1"></div>
+              <div class="style-option style-2" data-tpl="2"></div>
+              <div class="style-option style-3" data-tpl="3"></div>
+              <div class="style-option style-4" data-tpl="4"></div>
+              <div class="style-option style-5" data-tpl="5"></div>
+              <div class="style-option style-6" data-tpl="6"></div>
+            </div>
+          </div>
+
+          <button class="generate-btn" onclick="generateShare()">📸 生成我的主页卡片</button>
+        </div>
+
+        <!-- 预览 -->
+        <div class="preview-panel">
+          <div class="preview-header">
+            <span class="preview-dot" style="background:#FF5F57;"></span>
+            <span class="preview-dot" style="background:#FEBC2E;"></span>
+            <span class="preview-dot" style="background:#28C840;"></span>
+            <span style="margin-left:12px;font-size:12px;color:#999;">实时预览</span>
+          </div>
+          <div class="preview-content" id="previewContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTpl = 1;
+
+    function updatePreview() {
+      const name = document.getElementById('nameInput').value || '你的名字';
+      const tagline = document.getElementById('taglineInput').value || '一句话介绍';
+      const bio = document.getElementById('bioInput').value || '关于我的介绍...';
+      const tags = document.getElementById('tagsInput').value.split(/[,，]/).filter(t => t.trim());
+
+      const decoMap = {
+        1: '<div class="profile-deco deco-circle"></div>',
+        2: '<div class="profile-deco deco-square"></div>',
+        3: '<div class="profile-deco deco-wave"></div>',
+        4: '<div class="profile-deco deco-grid"></div>',
+        5: '<div class="profile-deco deco-sun"></div>',
+        6: '<div class="profile-deco deco-blob"></div>'
+      };
+
+      const tagsHtml = tags.map(t => `<span class="profile-tag">${t.trim()}</span>`).join('');
+
+      document.getElementById('previewContent').innerHTML = `
+        <div class="profile-page tpl-${currentTpl}">
+          ${decoMap[currentTpl]}
+          <h2>${name}</h2>
+          <div class="tagline">${tagline}</div>
+          <div class="profile-tags">${tagsHtml}</div>
+          <div class="bio">${bio}</div>
+        </div>
+      `;
+    }
+
+    function generateShare() {
+      const name = document.getElementById('nameInput').value;
+      const tagline = document.getElementById('taglineInput').value;
+      const bio = document.getElementById('bioInput').value;
+      const tags = document.getElementById('tagsInput').value;
+
+      const data = {
+        type: 'profile',
+        name, tagline, bio, tags,
+        template: currentTpl
+      };
+      sessionStorage.setItem('shareData', JSON.stringify(data));
+      window.location.href = 'share.html';
+    }
+
+    // 实时更新
+    ['nameInput', 'taglineInput', 'bioInput', 'tagsInput'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updatePreview);
+    });
+
+    // 风格选择
+    document.querySelectorAll('.style-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.style-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        currentTpl = parseInt(opt.dataset.tpl);
+        updatePreview();
+      });
+    });
+
+    updatePreview();
+  </script>
+</body>
+</html>

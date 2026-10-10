@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生成你的分享卡片 | 北辰青年 AI 实习</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .container {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: #1a1a2e;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+    .card-wrapper {
+      position: relative;
+      margin-bottom: 32px;
+    }
+    #shareCanvas {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      border: 3px solid #1a1a2e;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 28px;
+      border: 2px solid #1a1a2e;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fff;
+      color: #1a1a2e;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 4px 4px 0 #1a1a2e;
+    }
+    .btn.primary {
+      background: #FF6B35;
+      color: #fff;
+    }
+    .back-link {
+      margin-top: 24px;
+      color: #666;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #FF6B35; }
+    .tip {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>你的专属卡片 ✨</h1>
+    <p class="subtitle">保存图片，分享给朋友，邀请他们也来玩</p>
+
+    <div class="card-wrapper">
+      <canvas id="shareCanvas" width="840" height="1120"></canvas>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" onclick="downloadCard()">📥 保存图片</button>
+      <button class="btn" onclick="regenerate()">🔄 换个配色</button>
+      <button class="btn" onclick="goBack()">← 回去再玩</button>
+    </div>
+
+    <p class="tip">长按图片也可以保存哦</p>
+    <a href="../index.html" class="back-link">返回首页</a>
+  </div>
+
+  <script>
+    const data = JSON.parse(sessionStorage.getItem('shareData') || '{}');
+    let templateIdx = data.template || 0;
+
+    const templates = [
+      { bg1: '#E8EDFF', bg2: '#FFF0E8', accent: '#4361EE', name: '清晨蓝' },
+      { bg1: '#FFF0E8', bg2: '#FFE4E4', accent: '#FF6B35', name: '日落橙' },
+      { bg1: '#E6FFF7', bg2: '#E8EDFF', accent: '#059669', name: '薄荷绿' },
+      { bg1: '#F0EDFF', bg2: '#FFF0F5', accent: '#7B2CBF', name: '梦境紫' },
+      { bg1: '#FFF8E8', bg2: '#E6FFF7', accent: '#D97706', name: '暖阳黄' },
+      { bg1: '#FFE4EC', bg2: '#E8EDFF', accent: '#DB2777', name: '樱花粉' }
+    ];
+
+    function drawCard() {
+      const canvas = document.getElementById('shareCanvas');
+      const ctx = canvas.getContext('2d');
+      const tpl = templates[templateIdx % templates.length];
+      const W = canvas.width, H = canvas.height;
+
+      // 背景渐变
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, tpl.bg1);
+      grad.addColorStop(1, tpl.bg2);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 装饰几何图形
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      ctx.fillStyle = tpl.accent;
+      ctx.beginPath();
+      ctx.arc(W - 80, 100, 120, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(40, H - 200, 100, 100);
+      ctx.rotate(0.2);
+      ctx.fillRect(W - 150, H - 150, 80, 80);
+      ctx.restore();
+
+      // 边框
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(30, 30, W - 60, H - 60);
+
+      // 顶部标签
+      ctx.fillStyle = tpl.accent;
+      ctx.font = 'bold 22px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('✦ 北辰 AI 实验室', 70, 100);
+
+      // 标题
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = '900 56px sans-serif';
+      if (data.type === 'inspiration') {
+        ctx.fillText('AI 给我的', 70, 180);
+        ctx.fillStyle = tpl.accent;
+        ctx.fillText('5 个灵感', 70, 250);
+      } else if (data.type === 'profile') {
+        ctx.fillText('我的', 70, 180);
+        ctx.fillStyle = tpl.accent;
+        ctx.fillText('AI 个人主页', 70, 250);
+      }
+
+      // 内容
+      ctx.fillStyle = '#1a1a2e';
+      let y = 320;
+
+      if (data.type === 'inspiration') {
+        // 关键词
+        ctx.font = 'bold 20px sans-serif';
+        ctx.fillStyle = '#666';
+        ctx.fillText(`关键词：${data.keyword || '创作'}`, 70, y);
+        y += 50;
+
+        // 灵感列表
+        (data.ideas || []).forEach((idea, i) => {
+          // 序号
+          ctx.fillStyle = tpl.accent;
+          ctx.font = '900 24px sans-serif';
+          ctx.fillText(`${i + 1}`, 70, y);
+
+          // 内容（自动换行）
+          ctx.fillStyle = '#333';
+          ctx.font = '18px sans-serif';
+          const words = idea.split('');
+          let line = '';
+          let lineY = y;
+          for (let char of words) {
+            const testLine = line + char;
+            if (ctx.measureText(testLine).width > 580) {
+              ctx.fillText(line, 110, lineY);
+              line = char;
+              lineY += 28;
+            } else {
+              line = testLine;
+            }
+          }
+          ctx.fillText(line, 110, lineY);
+          y = lineY + 45;
+        });
+      } else if (data.type === 'profile') {
+        // 名字
+        ctx.font = '900 48px sans-serif';
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillText(data.name || '你的名字', 70, y);
+        y += 50;
+
+        // 标签
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = tpl.accent;
+        ctx.fillText(data.tagline || '一句话介绍', 70, y);
+        y += 50;
+
+        // 标签
+        const tags = (data.tags || '').split(/[,，]/).filter(t => t.trim());
+        ctx.font = '16px sans-serif';
+        let tagX = 70;
+        tags.forEach(tag => {
+          const tw = ctx.measureText(tag.trim()).width + 30;
+          if (tagX + tw > W - 70) { tagX = 70; y += 40; }
+          ctx.fillStyle = tpl.accent;
+          ctx.globalAlpha = 0.15;
+          roundRect(ctx, tagX, y - 22, tw, 32, 16);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = tpl.accent;
+          ctx.fillText(tag.trim(), tagX + 15, y);
+          tagX += tw + 10;
+        });
+        y += 60;
+
+        // 简介
+        ctx.fillStyle = '#444';
+        ctx.font = '17px sans-serif';
+        const bio = data.bio || '';
+        const words = bio.split('');
+        let line = '';
+        for (let char of words) {
+          const testLine = line + char;
+          if (ctx.measureText(testLine).width > 620) {
+            ctx.fillText(line, 70, y);
+            line = char;
+            y += 30;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, 70, y);
+      }
+
+      // 底部
+      const bottomY = H - 120;
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText('你也来试试？', 70, bottomY);
+
+      ctx.font = '16px sans-serif';
+      ctx.fillStyle = '#666';
+      ctx.fillText('北辰青年 AI 实习第四期', 70, bottomY + 35);
+
+      // 二维码占位
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(W - 170, bottomY - 20, 100, 100);
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(W - 170, bottomY - 20, 100, 100);
+      ctx.fillStyle = '#999';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('扫码体验', W - 120, bottomY + 38);
+      ctx.textAlign = 'left';
+
+      // 装饰线
+      ctx.strokeStyle = tpl.accent;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(70, bottomY - 30);
+      ctx.lineTo(200, bottomY - 30);
+      ctx.stroke();
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function downloadCard() {
+      const canvas = document.getElementById('shareCanvas');
+      const link = document.createElement('a');
+      link.download = '北辰AI-我的卡片.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function regenerate() {
+      templateIdx = (templateIdx + 1) % templates.length;
+      drawCard();
+    }
+
+    function goBack() {
+      if (data.type === 'inspiration') {
+        window.location.href = 'discover.html';
+      } else {
+        window.location.href = 'create.html';
+      }
+    }
+
+    drawCard();
+  </script>
+</body>
+</html>
