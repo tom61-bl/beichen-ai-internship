@@ -8,8 +8,14 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <style>
-    :root { --theme-color: var(--theme-collab); }
-    .theme-hero { background: linear-gradient(135deg, var(--theme-collab-light) 0%, #fff 100%); }
+    .theme-hero { background:#E6FFF7; }
+    .theme-hero-title { color:#059669; }
+    .theme-hero-title .line2 { display:block; color:#1a1a2e; margin-left:140px; }
+    .deco-network { position:absolute; inset:0; }
+    .deco-network .node { position:absolute; width:20px; height:20px; background:#059669; border:2px solid #1a1a2e; border-radius:50%; }
+    .deco-network .n1{top:20%;left:5%;} .deco-network .n2{top:30%;left:25%;} .deco-network .n3{top:65%;left:12%;} .deco-network .n4{top:72%;left:30%;} .deco-network .n5{top:25%;right:5%;} .deco-network .n6{top:68%;right:12%;}
+    .deco-network svg { position:absolute; inset:0; width:100%; height:100%; opacity:0.3; }
+    @media(max-width:900px){ .theme-hero-title .line2{margin-left:0;} .deco-network{display:none;} }
   </style>
 </head>
 <body>
@@ -38,9 +44,23 @@
   <main class="main">
 
     <section class="theme-hero">
+      <div class="deco-network">
+        <svg viewBox="0 0 1000 700" preserveAspectRatio="none">
+          <line x1="60" y1="150" x2="260" y2="220" stroke="#059669" stroke-width="2"/>
+          <line x1="260" y1="220" x2="130" y2="480" stroke="#059669" stroke-width="2"/>
+          <line x1="130" y1="480" x2="310" y2="530" stroke="#059669" stroke-width="2"/>
+          <line x1="260" y1="220" x2="940" y2="180" stroke="#059669" stroke-width="2"/>
+          <line x1="260" y1="220" x2="870" y2="500" stroke="#059669" stroke-width="2"/>
+        </svg>
+        <span class="node n1"></span><span class="node n2"></span><span class="node n3"></span>
+        <span class="node n4"></span><span class="node n5"></span><span class="node n6"></span>
+      </div>
       <div class="container">
         <span class="page-header-badge" style="border-color:#059669;color:#059669;">03 / 共创 AI</span>
-        <h1 class="theme-hero-title" style="color:#059669;">和伙伴一起能创造什么？</h1>
+        <h1 class="theme-hero-title">
+          一起
+          <span class="line2">搞点事情。</span>
+        </h1>
         <p class="theme-hero-question">组队、碰撞、实践，在真实项目中找到志同道合的创作者。</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
           <a href="gallery.html" class="btn btn-brutal btn-lg">看看团队作品 →</a>
@@ -51,71 +71,44 @@
 
     <section class="section">
       <div class="container">
-        <div class="reveal">
-          <h2 style="margin-bottom:8px;">你可以在这里共创</h2>
-          <p style="color:var(--color-text-secondary);">三个方向，从个人到团队。</p>
-        </div>
+        <h2 class="section-title reveal">你可以在这里<span style="color:#059669;">共创</span></h2>
         <div class="theme-needs">
-          <div class="theme-need-item reveal" style="--theme-color:var(--theme-collab);">
-            <h4>👥 团队项目实践</h4>
-            <p>和伙伴组队完成真实项目，体验从想法到落地的完整流程。</p>
-          </div>
-          <div class="theme-need-item reveal" style="--theme-color:var(--theme-collab);">
-            <h4>🌐 跨界合作碰撞</h4>
-            <p>不同专业背景的人聚在一起，往往能碰撞出意想不到的创意。</p>
-          </div>
-          <div class="theme-need-item reveal" style="--theme-color:var(--theme-collab);">
-            <h4>📈 项目经验积累</h4>
-            <p>真实的团队协作经历，为你的简历和作品集添上硬核一笔。</p>
-          </div>
+          <div class="theme-need-item reveal"><h4>👥 团队项目实践</h4><p>和伙伴组队完成真实项目，体验从想法到落地的完整流程。</p></div>
+          <div class="theme-need-item reveal"><h4>🌐 跨界合作碰撞</h4><p>不同专业背景的人聚在一起，往往能碰撞出意想不到的创意。</p></div>
+          <div class="theme-need-item reveal"><h4>📈 项目经验积累</h4><p>真实的团队协作经历，为你的简历和作品集添上硬核一笔。</p></div>
         </div>
       </div>
     </section>
 
-    <section class="section" style="background:var(--color-bg-alt);">
+    <section class="section" style="background:#fff;">
       <div class="container">
         <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
-          <div>
-            <h2>精选团队成果</h2>
-            <p style="color:var(--color-text-secondary);">往期学员在「共创 AI」方向的团队作品</p>
-          </div>
+          <h2 class="section-title" style="font-size:clamp(28px,4vw,44px);">精选团队成果</h2>
           <a href="gallery.html" class="btn btn-outline">查看全部 →</a>
         </div>
-        <div class="works-preview">
-          <div class="work-placeholder reveal">
-            <span class="work-placeholder-icon">🖼️</span>
-            <span class="work-placeholder-text">作品占位</span>
-          </div>
-          <div class="work-placeholder reveal">
-            <span class="work-placeholder-icon">🖼️</span>
-            <span class="work-placeholder-text">作品占位</span>
-          </div>
-          <div class="work-placeholder reveal">
-            <span class="work-placeholder-icon">🖼️</span>
-            <span class="work-placeholder-text">作品占位</span>
-          </div>
+        <div class="gallery-grid">
+          <a href="https://3708c514e1d049eb9e5d2285a067b96d.bj3.agentos-app.net/" target="_blank" class="work-card reveal">
+            <div class="work-card-cover" style="background:linear-gradient(135deg,#FFE4E4,#FFF0F0);"><span class="emoji">🎮</span></div>
+            <div class="work-card-body"><h4 class="work-card-title">泰有实力是我不队</h4><p class="work-card-desc">敢想敢做，AI玩透</p></div>
+          </a>
+          <a href="https://1daf2f4a924d48c39a7139c51874fbaf.app.workbuddy.link/" target="_blank" class="work-card reveal">
+            <div class="work-card-cover" style="background:linear-gradient(135deg,#E4ECFF,#EDF2FF);"><span class="emoji">🧭</span></div>
+            <div class="work-card-body"><h4 class="work-card-title">青年可能性探险队</h4><p class="work-card-desc">10个探险任务，130+青年样本</p></div>
+          </a>
+          <a href="https://ce5c1e92256648b48b5913576d088a14.app.codebuddy.work/" target="_blank" class="work-card reveal">
+            <div class="work-card-cover" style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);"><span class="emoji">∞</span></div>
+            <div class="work-card-body"><h4 class="work-card-title">Creator Guild</h4><p class="work-card-desc">31位进化者，按下START</p></div>
+          </a>
         </div>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <div class="reveal" style="text-align:center;margin-bottom:32px;">
-          <h2>还想看看其他方向？</h2>
-        </div>
+        <h2 class="section-title reveal" style="text-align:center;margin-bottom:40px;">还想看看其他方向？</h2>
         <div class="needs-grid" style="grid-template-columns:repeat(2,1fr);">
-          <a href="discover.html" class="need-card reveal" style="--card-accent:var(--theme-discover);text-align:center;">
-            <div class="need-card-icon">🔍</div>
-            <h3 class="need-card-title">认识 AI</h3>
-            <p class="need-card-desc">从好奇开始，发现可能</p>
-            <div class="need-card-arrow" style="justify-content:center;">去看看 →</div>
-          </a>
-          <a href="create.html" class="need-card reveal" style="--card-accent:var(--theme-create);text-align:center;">
-            <div class="need-card-icon">⚡</div>
-            <h3 class="need-card-title">使用 AI</h3>
-            <p class="need-card-desc">动手做出自己的作品</p>
-            <div class="need-card-arrow" style="justify-content:center;">去看看 →</div>
-          </a>
+          <a href="discover.html" class="need-card reveal" style="text-align:center;"><div class="need-card-icon">🔍</div><h3 class="need-card-title">认识 AI</h3><p class="need-card-desc">从好奇开始，发现可能</p><span class="go" style="justify-content:center;">去看看 →</span></a>
+          <a href="create.html" class="need-card reveal" style="text-align:center;"><div class="need-card-icon">⚡</div><h3 class="need-card-title">使用 AI</h3><p class="need-card-desc">动手做出自己的作品</p><span class="go" style="justify-content:center;">去看看 →</span></a>
         </div>
       </div>
     </section>
@@ -125,32 +118,12 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-inner">
-        <div class="footer-brand">
-          <h3>北辰青年 AI 实习</h3>
-          <p>让更多年轻人接触 AI、使用 AI、创造 AI。</p>
-        </div>
-        <div class="footer-col">
-          <h4>探索</h4>
-          <a href="discover.html">认识 AI</a>
-          <a href="create.html">使用 AI</a>
-          <a href="collab.html">共创 AI</a>
-          <a href="gallery.html">成果库</a>
-        </div>
-        <div class="footer-col">
-          <h4>了解</h4>
-          <a href="about-program.html">活动介绍</a>
-          <a href="about-program.html#faq">常见问题</a>
-          <a href="about-us.html">关于北辰</a>
-        </div>
-        <div class="footer-col">
-          <h4>参与</h4>
-          <a href="apply.html">立即报名</a>
-        </div>
+        <div class="footer-brand"><h3>北辰青年 AI 实习</h3><p>让更多年轻人接触 AI、使用 AI、创造 AI。</p></div>
+        <div class="footer-col"><h4>探索</h4><a href="discover.html">认识 AI</a><a href="create.html">使用 AI</a><a href="collab.html">共创 AI</a><a href="gallery.html">成果库</a></div>
+        <div class="footer-col"><h4>了解</h4><a href="about-program.html">活动介绍</a><a href="about-program.html#faq">常见问题</a><a href="about-us.html">关于北辰</a></div>
+        <div class="footer-col"><h4>参与</h4><a href="apply.html">立即报名</a></div>
       </div>
-      <div class="footer-bottom">
-        <span>© 2026 北辰青年 · AI 实习第四期</span>
-        <span>用 AI 创造有意思的东西</span>
-      </div>
+      <div class="footer-bottom"><span>© 2026 北辰青年 · AI 实习第四期</span><span>用 AI 创造有意思的东西</span></div>
     </div>
   </footer>
 

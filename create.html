@@ -8,8 +8,15 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <style>
-    :root { --theme-color: var(--theme-create); }
-    .theme-hero { background: linear-gradient(135deg, var(--theme-create-light) 0%, #fff 100%); }
+    .theme-hero { background:#FFF0E8; }
+    .theme-hero-title { color:#FF6B35; }
+    .theme-hero-title .line2 { display:block; color:#1a1a2e; text-align:right; margin-right:60px; }
+    .deco-grid { position:absolute; left:60px; top:50%; transform:translateY(-50%); display:grid; grid-template-columns:repeat(3,70px); gap:10px; }
+    .deco-grid span { width:70px; height:70px; border:3px solid #FF6B35; border-radius:8px; }
+    .deco-grid span:nth-child(1){background:#FF6B35;}
+    .deco-grid span:nth-child(5){background:#FF6B35;opacity:0.5;}
+    .deco-grid span:nth-child(9){background:#FF6B35;opacity:0.2;}
+    @media(max-width:900px){ .theme-hero-title .line2{margin-right:0;text-align:left;} .deco-grid{display:none;} }
   </style>
 </head>
 <body>
@@ -38,9 +45,13 @@
   <main class="main">
 
     <section class="theme-hero">
+      <div class="deco-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
       <div class="container">
-        <span class="page-header-badge" style="border-color:var(--theme-create);color:var(--theme-create);">02 / 使用 AI</span>
-        <h1 class="theme-hero-title" style="color:var(--theme-create);">我能用 AI 做出什么？</h1>
+        <span class="page-header-badge" style="border-color:#FF6B35;color:#FF6B35;">02 / 使用 AI</span>
+        <h1 class="theme-hero-title">
+          把想法
+          <span class="line2">做出来。</span>
+        </h1>
         <p class="theme-hero-question">从想法到作品，用 AI 工具把你脑子里的东西变成现实。</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
           <a href="gallery.html" class="btn btn-brutal btn-lg">看看大家的作品 →</a>
@@ -51,71 +62,44 @@
 
     <section class="section">
       <div class="container">
-        <div class="reveal">
-          <h2 style="margin-bottom:8px;">你可以在这里创造</h2>
-          <p style="color:var(--color-text-secondary);">三个方向，从工具到作品。</p>
-        </div>
+        <h2 class="section-title reveal">你可以在这里<span style="color:#FF6B35;">创造</span></h2>
         <div class="theme-needs">
-          <div class="theme-need-item reveal" style="--theme-color:var(--theme-create);">
-            <h4>⚡ 效率工具与工作流</h4>
-            <p>搭建自己的 AI 工作台，把重复劳动自动化，省下时间做更重要的事。</p>
-          </div>
-          <div class="theme-need-item reveal" style="--theme-color:var(--theme-create);">
-            <h4>🌐 个人网站与作品集</h4>
-            <p>用 AI 辅助做出属于自己的网站，展示你的想法和作品。</p>
-          </div>
-          <div class="theme-need-item reveal" style="--theme-color:var(--theme-create);">
-            <h4>🤖 AI Agent 与小应用</h4>
-            <p>尝试打造能帮你干活的 AI 助手，从简单的自动化开始。</p>
-          </div>
+          <div class="theme-need-item reveal"><h4>⚡ 效率工具与工作流</h4><p>搭建自己的 AI 工作台，把重复劳动自动化，省下时间做更重要的事。</p></div>
+          <div class="theme-need-item reveal"><h4>🌐 个人网站与作品集</h4><p>用 AI 辅助做出属于自己的网站，展示你的想法和作品。</p></div>
+          <div class="theme-need-item reveal"><h4>🤖 AI Agent 与小应用</h4><p>打造能帮你干活的 AI 助手，从简单的自动化开始。</p></div>
         </div>
       </div>
     </section>
 
-    <section class="section" style="background:var(--color-bg-alt);">
+    <section class="section" style="background:#fff;">
       <div class="container">
         <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px;">
-          <div>
-            <h2>精选成果</h2>
-            <p style="color:var(--color-text-secondary);">往期学员在「使用 AI」方向的创作作品</p>
-          </div>
+          <h2 class="section-title" style="font-size:clamp(28px,4vw,44px);">精选成果</h2>
           <a href="gallery.html" class="btn btn-outline">查看全部 →</a>
         </div>
-        <div class="works-preview">
-          <div class="work-placeholder reveal">
-            <span class="work-placeholder-icon">🖼️</span>
-            <span class="work-placeholder-text">作品占位</span>
-          </div>
-          <div class="work-placeholder reveal">
-            <span class="work-placeholder-icon">🖼️</span>
-            <span class="work-placeholder-text">作品占位</span>
-          </div>
-          <div class="work-placeholder reveal">
-            <span class="work-placeholder-icon">🖼️</span>
-            <span class="work-placeholder-text">作品占位</span>
-          </div>
+        <div class="gallery-grid">
+          <a href="https://ncnnltx77huv.feishuapp.com/app/app_17a7wm8ftzf/" target="_blank" class="work-card reveal">
+            <div class="work-card-cover" style="background:linear-gradient(135deg,#FFE8D6,#FFF0E8);"><span class="emoji">📍</span></div>
+            <div class="work-card-body"><h4 class="work-card-title">晨阳坐标</h4><p class="work-card-desc">可以直接提问的说明书</p></div>
+          </a>
+          <a href="https://fb9401bf75f9449b861c7ca44adf692b.app.codebuddy.work/index.html" target="_blank" class="work-card reveal">
+            <div class="work-card-cover" style="background:linear-gradient(135deg,#E8E4F5,#F0EDFF);"><span class="emoji">🏔️</span></div>
+            <div class="work-card-body"><h4 class="work-card-title">观世录</h4><p class="work-card-desc">山水舟境，四境入口</p></div>
+          </a>
+          <a href="https://a48a12eacbba4cfa9f6cb91d4c5cc81a.app.codebuddy.work/" target="_blank" class="work-card reveal">
+            <div class="work-card-cover" style="background:linear-gradient(135deg,#FFF4D6,#FFF8E8);"><span class="emoji">🎭</span></div>
+            <div class="work-card-body"><h4 class="work-card-title">棒五 · 多面</h4><p class="work-card-desc">12个身份，每个想做都值得落地</p></div>
+          </a>
         </div>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <div class="reveal" style="text-align:center;margin-bottom:32px;">
-          <h2>还想看看其他方向？</h2>
-        </div>
+        <h2 class="section-title reveal" style="text-align:center;margin-bottom:40px;">还想看看其他方向？</h2>
         <div class="needs-grid" style="grid-template-columns:repeat(2,1fr);">
-          <a href="discover.html" class="need-card reveal" style="--card-accent:var(--theme-discover);text-align:center;">
-            <div class="need-card-icon">🔍</div>
-            <h3 class="need-card-title">认识 AI</h3>
-            <p class="need-card-desc">从好奇开始，发现可能</p>
-            <div class="need-card-arrow" style="justify-content:center;">去看看 →</div>
-          </a>
-          <a href="collab.html" class="need-card reveal" style="--card-accent:var(--theme-collab);text-align:center;">
-            <div class="need-card-icon">🤝</div>
-            <h3 class="need-card-title">共创 AI</h3>
-            <p class="need-card-desc">和伙伴一起团队实践</p>
-            <div class="need-card-arrow" style="justify-content:center;">去看看 →</div>
-          </a>
+          <a href="discover.html" class="need-card reveal" style="text-align:center;"><div class="need-card-icon">🔍</div><h3 class="need-card-title">认识 AI</h3><p class="need-card-desc">从好奇开始，发现可能</p><span class="go" style="justify-content:center;">去看看 →</span></a>
+          <a href="collab.html" class="need-card reveal" style="text-align:center;"><div class="need-card-icon">🤝</div><h3 class="need-card-title">共创 AI</h3><p class="need-card-desc">和伙伴一起团队实践</p><span class="go" style="justify-content:center;">去看看 →</span></a>
         </div>
       </div>
     </section>
@@ -125,32 +109,12 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-inner">
-        <div class="footer-brand">
-          <h3>北辰青年 AI 实习</h3>
-          <p>让更多年轻人接触 AI、使用 AI、创造 AI。</p>
-        </div>
-        <div class="footer-col">
-          <h4>探索</h4>
-          <a href="discover.html">认识 AI</a>
-          <a href="create.html">使用 AI</a>
-          <a href="collab.html">共创 AI</a>
-          <a href="gallery.html">成果库</a>
-        </div>
-        <div class="footer-col">
-          <h4>了解</h4>
-          <a href="about-program.html">活动介绍</a>
-          <a href="about-program.html#faq">常见问题</a>
-          <a href="about-us.html">关于北辰</a>
-        </div>
-        <div class="footer-col">
-          <h4>参与</h4>
-          <a href="apply.html">立即报名</a>
-        </div>
+        <div class="footer-brand"><h3>北辰青年 AI 实习</h3><p>让更多年轻人接触 AI、使用 AI、创造 AI。</p></div>
+        <div class="footer-col"><h4>探索</h4><a href="discover.html">认识 AI</a><a href="create.html">使用 AI</a><a href="collab.html">共创 AI</a><a href="gallery.html">成果库</a></div>
+        <div class="footer-col"><h4>了解</h4><a href="about-program.html">活动介绍</a><a href="about-program.html#faq">常见问题</a><a href="about-us.html">关于北辰</a></div>
+        <div class="footer-col"><h4>参与</h4><a href="apply.html">立即报名</a></div>
       </div>
-      <div class="footer-bottom">
-        <span>© 2026 北辰青年 · AI 实习第四期</span>
-        <span>用 AI 创造有意思的东西</span>
-      </div>
+      <div class="footer-bottom"><span>© 2026 北辰青年 · AI 实习第四期</span><span>用 AI 创造有意思的东西</span></div>
     </div>
   </footer>
 
