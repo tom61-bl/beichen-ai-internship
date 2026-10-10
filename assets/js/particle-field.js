@@ -13,6 +13,7 @@
   let mouse = { x: -9999, y: -9999, px: -9999, py: -9999, active: false, vx: 0, vy: 0 };
   let cursorTrail = [];
   let clickEffects = [];
+  let fireworks = [];
   let wordParticles = [];
   let animId;
   let time = 0;
@@ -243,6 +244,143 @@
     }
   }
 
+  // 烟花：上升 → 绽放 → 下落
+  class Firework {
+    constructor(x, y) {
+      this.startX = x;
+      this.startY = y;
+      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.phase = 'rising'; // rising -> burst -> falling
+      this.riser = {
+        x: x,
+        y: y,
+        vy: -(Math.random() * 4 + 8), // 上升速度
+        vx: (Math.random() - 0.5) * 1.5,
+        trail: []
+      };
+      this.burstHeight = y - (Math.random() * 120 + 100); // 绽放高度
+      this.particles = [];
+      this.life = 1;
+    }
+
+    update() {
+      if (this.phase === 'rising') {
+        // 尾迹
+        this.riser.trail.push({ x: this.riser.x, y: this.riser.y, life: 1 });
+        if (this.riser.trail.length > 12) this.riser.trail.shift();
+        this.riser.trail.forEach(t => t.life *= 0.85);
+
+        this.riser.x += this.riser.vx;
+        this.riser.y += this.riser.vy;
+        this.riser.vy += 0.12; // 重力减速
+
+        // 到达顶点 → 绽放
+        if (this.riser.vy >= -1 || this.riser.y <= this.burstHeight) {
+          this.burst();
+        }
+      } else if (this.phase === 'burst' || this.phase === 'falling') {
+        this.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.08; // 重力
+          p.vx *= 0.98;
+          p.life -= p.decay;
+        });
+        this.particles = this.particles.filter(p => p.life > 0);
+        if (this.particles.length === 0) this.life = 0;
+      }
+    }
+
+    burst() {
+      this.phase = 'burst';
+      const count = Math.floor(Math.random() * 20) + 25;
+      const burstColor = this.color;
+      const secondColor = colors[Math.floor(Math.random() * colors.length)];
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+        const speed = Math.random() * 4 + 2;
+        this.particles.push({
+          x: this.riser.x,
+          y: this.riser.y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          decay: Math.random() * 0.012 + 0.008,
+          size: Math.random() * 2.5 + 1.5,
+          color: Math.random() > 0.3 ? burstColor : secondColor
+        });
+      }
+      // 绽放冲击波，影响周围粒子
+      clickEffects.push({
+        x: this.riser.x,
+        y: this.riser.y,
+        radius: 0,
+        expandSpeed: 8,
+        strength: 6,
+        color: burstColor
+      });
+      // 中心闪光
+      this.flash = 1;
+    }
+
+    draw() {
+      if (this.phase === 'rising') {
+        // 尾迹
+        this.riser.trail.forEach((t, i) => {
+          ctx.save();
+          ctx.globalAlpha = t.life * 0.6;
+          ctx.fillStyle = this.color;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+        // 上升弹
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(this.riser.x, this.riser.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else {
+        // 中心闪光
+        if (this.flash && this.flash > 0) {
+          ctx.save();
+          ctx.globalAlpha = this.flash;
+          const flashGrad = ctx.createRadialGradient(
+            this.riser.x, this.riser.y, 0,
+            this.riser.x, this.riser.y, 60
+          );
+          flashGrad.addColorStop(0, '#fff');
+          flashGrad.addColorStop(0.3, this.color);
+          flashGrad.addColorStop(1, 'transparent');
+          ctx.fillStyle = flashGrad;
+          ctx.beginPath();
+          ctx.arc(this.riser.x, this.riser.y, 60, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          this.flash *= 0.85;
+        }
+        // 绽放粒子
+        this.particles.forEach(p => {
+          ctx.save();
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+    }
+  }
+
   function init() {
     resize();
     const count = window.innerWidth < 768 ? 60 : 120;
@@ -277,99 +415,130 @@
     if (!mouse.active) return;
 
     const cx = mouse.x, cy = mouse.y;
-    const t = time * 0.05;
+    const t = time * 0.06;
 
-    // 龙卷风范围（淡底）
+    // 龙卷风参数
+    const tornadoHeight = 100;  // 龙卷风高度
+    const bottomRadius = 55;    // 底部宽口半径
+    const topRadius = 8;        // 顶部窄口半径
+    const arms = 5;             // 螺旋臂数量
+
+    // 漏斗半透明填充（龙卷风主体）
     ctx.save();
-    ctx.globalAlpha = 0.06;
-    const tornadoGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, GRAVITY_RADIUS);
-    tornadoGrad.addColorStop(0, '#FF6B35');
-    tornadoGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = tornadoGrad;
+    ctx.globalAlpha = 0.08;
+    const funnelGrad = ctx.createLinearGradient(cx, cy - tornadoHeight, cx, cy + 20);
+    funnelGrad.addColorStop(0, '#4361EE');
+    funnelGrad.addColorStop(0.5, '#FF6B35');
+    funnelGrad.addColorStop(1, '#06D6A0');
+    ctx.fillStyle = funnelGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, GRAVITY_RADIUS, 0, Math.PI * 2);
+    // 画漏斗形状（左边缘）
+    ctx.moveTo(cx - bottomRadius, cy + 15);
+    ctx.quadraticCurveTo(cx - bottomRadius * 0.6, cy - tornadoHeight * 0.4, cx - topRadius, cy - tornadoHeight);
+    // 顶部
+    ctx.lineTo(cx + topRadius, cy - tornadoHeight);
+    // 右边缘
+    ctx.quadraticCurveTo(cx + bottomRadius * 0.6, cy - tornadoHeight * 0.4, cx + bottomRadius, cy + 15);
+    // 底部椭圆
+    ctx.ellipse(cx, cy + 15, bottomRadius, bottomRadius * 0.25, 0, 0, Math.PI, true);
+    ctx.closePath();
     ctx.fill();
     ctx.restore();
 
-    // 螺旋气流线（3条，旋转上升）
-    for (let arm = 0; arm < 3; arm++) {
+    // 多条螺旋气流线（绕漏斗表面旋转上升）
+    for (let arm = 0; arm < arms; arm++) {
+      const armOffset = (arm / arms) * Math.PI * 2;
+      const armColor = colors[arm % colors.length];
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(t + arm * (Math.PI * 2 / 3));
-      ctx.strokeStyle = arm === 0 ? '#FF6B35' : (arm === 1 ? '#4361EE' : '#06D6A0');
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = armColor;
+      ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 0.45;
+      ctx.shadowColor = armColor;
+      ctx.shadowBlur = 6;
       ctx.beginPath();
-      // 螺旋线：从中心向外，同时向上
-      for (let i = 0; i <= 60; i++) {
-        const progress = i / 60;
-        const angle = progress * Math.PI * 3; // 转1.5圈
-        const radius = progress * 70; // 从中心向外扩大
-        const lift = -progress * 50; // 向上
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius * 0.4 + lift; // 压扁成漏斗
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      for (let i = 0; i <= 80; i++) {
+        const progress = i / 80; // 0=底部, 1=顶部
+        // 漏斗半径：底部大，向上逐渐缩小
+        const radius = bottomRadius * (1 - progress) + topRadius * progress;
+        // 旋转：越往上转得越快（角动量守恒）
+        const angle = t * (1 + progress * 2) + armOffset + progress * Math.PI * 4;
+        const y = cy + 15 - progress * (tornadoHeight + 15);
+        const x = cx + Math.cos(angle) * radius;
+        const ellipseY = Math.sin(angle) * radius * 0.3; // 压扁成椭圆透视
+        if (i === 0) ctx.moveTo(x, y + ellipseY);
+        else ctx.lineTo(x, y + ellipseY);
       }
       ctx.stroke();
       ctx.restore();
     }
 
-    // 风眼（中心黑点+发光）
+    // 底部吸入漩涡（宽口椭圆）
     ctx.save();
-    ctx.fillStyle = '#1a1a2e';
-    ctx.shadowColor = '#FF6B35';
-    ctx.shadowBlur = 25;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    // 风眼外环（快速旋转）
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(t * 3);
-    ctx.strokeStyle = '#FF6B35';
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.8;
-    ctx.setLineDash([8, 6]);
-    ctx.beginPath();
-    ctx.arc(0, 0, COLLISION_RADIUS, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-
-    // 底部吸入漩涡（宽底）
-    ctx.save();
-    ctx.translate(cx, cy + 30);
-    ctx.rotate(-t * 0.8);
+    ctx.translate(cx, cy + 15);
+    ctx.rotate(-t * 0.6);
     ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = 0.3;
     ctx.beginPath();
-    for (let i = 0; i <= 40; i++) {
-      const progress = i / 40;
-      const angle = progress * Math.PI * 2;
-      const radius = 15 + progress * 55;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius * 0.3;
+    for (let i = 0; i <= 50; i++) {
+      const progress = i / 50;
+      const angle = progress * Math.PI * 2.5;
+      const r = 8 + progress * (bottomRadius - 8);
+      const x = Math.cos(angle) * r;
+      const y = Math.sin(angle) * r * 0.28;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.stroke();
     ctx.restore();
 
-    // 鼠标拖尾（螺旋状）
+    // 风眼（中心黑点+强发光）
+    ctx.save();
+    ctx.fillStyle = '#1a1a2e';
+    ctx.shadowColor = '#FF6B35';
+    ctx.shadowBlur = 30;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // 风眼内环
+    ctx.strokeStyle = '#FF6B35';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.arc(cx, cy, COLLISION_RADIUS * 0.5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // 顶部云团（龙卷风顶端）
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#4361EE';
+    for (let i = 0; i < 5; i++) {
+      const cloudAngle = t * 0.5 + (i / 5) * Math.PI * 2;
+      const cloudR = 15 + Math.sin(t + i) * 5;
+      ctx.beginPath();
+      ctx.arc(
+        cx + Math.cos(cloudAngle) * cloudR,
+        cy - tornadoHeight + Math.sin(cloudAngle) * cloudR * 0.4,
+        10 + Math.sin(t * 2 + i) * 3,
+        0, Math.PI * 2
+      );
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 鼠标拖尾（螺旋上升的小粒子）
     cursorTrail.forEach((pos, i) => {
-      const alpha = (i / cursorTrail.length) * 0.2;
-      const size = (i / cursorTrail.length) * 15;
+      const alpha = (i / cursorTrail.length) * 0.25;
+      const size = (i / cursorTrail.length) * 8 + 1;
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.strokeStyle = '#FF6B35';
-      ctx.lineWidth = 1.5;
+      ctx.fillStyle = '#FF6B35';
+      ctx.shadowColor = '#FF6B35';
+      ctx.shadowBlur = 4;
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y - i * 2, size, 0, Math.PI * 1.5);
-      ctx.stroke();
+      ctx.arc(pos.x + Math.sin(time * 0.1 + i) * 5, pos.y - i * 3, size, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     });
   }
@@ -394,21 +563,24 @@
     wordParticles = wordParticles.filter(wp => wp.life > 0);
     wordParticles.forEach(wp => { wp.update(); wp.draw(); });
 
-    // 点击效果
+    // 点击效果（冲击波）
     clickEffects = clickEffects.filter(e => {
       e.radius += e.expandSpeed;
       e.strength *= 0.95;
-      // 画涟漪
       ctx.save();
-      ctx.globalAlpha = e.strength * 0.5;
+      ctx.globalAlpha = e.strength * 0.4;
       ctx.strokeStyle = e.color;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
       return e.strength > 0.1;
     });
+
+    // 烟花
+    fireworks = fireworks.filter(fw => fw.life > 0);
+    fireworks.forEach(fw => { fw.update(); fw.draw(); });
 
     drawCursor();
 
@@ -446,18 +618,17 @@
   }
 
   function handleClick(x, y) {
-    // 点击产生爆炸+漩涡
-    clickEffects.push({
-      x, y,
-      radius: 0,
-      expandSpeed: 6,
-      strength: 8,
-      color: colors[Math.floor(Math.random() * colors.length)]
-    });
-
-    // 生成词
-    const word = words[Math.floor(Math.random() * words.length)];
-    setTimeout(() => spawnWord(x, y, word), 200);
+    // 点击发射一个烟花
+    fireworks.push(new Firework(x, y));
+    // 偶尔连发两个
+    if (Math.random() > 0.5) {
+      setTimeout(() => {
+        fireworks.push(new Firework(
+          x + (Math.random() - 0.5) * 100,
+          y + (Math.random() - 0.5) * 40
+        ));
+      }, 200);
+    }
   }
 
   // 鼠标事件
