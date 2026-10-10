@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作品详情 | 北辰青年 AI 实习第四期</title>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <style>
+    .work-detail-hero {
+      padding: 80px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .work-detail-hero .deco-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .work-detail-cover {
+      width: 100%;
+      max-width: 800px;
+      height: 360px;
+      border: 3px solid #1a1a2e;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      margin: 0 auto 40px;
+      box-shadow: 8px 8px 0 #1a1a2e;
+      position: relative;
+    }
+    .work-detail-meta {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .work-detail-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .work-detail-author {
+      text-align: center;
+      color: #666;
+      font-size: 17px;
+      margin-bottom: 24px;
+    }
+    .work-detail-tags {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .work-tag {
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid;
+    }
+    .work-detail-body {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+    .work-detail-desc {
+      font-size: 17px;
+      line-height: 1.9;
+      color: #333;
+      margin-bottom: 40px;
+    }
+    .work-highlight {
+      background: #FFF8E8;
+      border-left: 4px solid #FFD166;
+      padding: 20px 24px;
+      border-radius: 0 12px 12px 0;
+      margin-bottom: 40px;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    .work-highlight strong {
+      color: #D97706;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+    .work-cta-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+    .work-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+      border-top: 2px solid #eee;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .work-nav a {
+      color: #666;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .work-nav a:hover { color: #FF6B35; }
+    .related-section {
+      background: #fafafa;
+      padding: 80px 0;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 32px;
+    }
+    @media (max-width: 900px) {
+      .related-grid { grid-template-columns: 1fr; }
+      .work-detail-cover { height: 240px; font-size: 80px; }
+    }
+    .not-found {
+      text-align: center;
+      padding: 120px 24px;
+    }
+    .not-found h2 {
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>北辰 AI 实习</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">首页</a>
+        <a href="gallery.html" class="nav-link">成果探索</a>
+        <a href="about-program.html" class="nav-link">活动介绍</a>
+        <a href="about-us.html" class="nav-link">关于北辰</a>
+        <a href="apply.html" class="btn btn-primary nav-cta">立即报名</a>
+      </div>
+      <div class="nav-toggle"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <div class="nav-mobile">
+    <a href="index.html" class="nav-mobile-link">首页</a>
+    <a href="gallery.html" class="nav-mobile-link">成果探索</a>
+    <a href="about-program.html" class="nav-mobile-link">活动介绍</a>
+    <a href="about-us.html" class="nav-mobile-link">关于北辰</a>
+    <a href="apply.html" class="btn btn-primary" style="text-align:center;margin-top:16px;">立即报名</a>
+  </div>
+
+  <main class="main" id="app">
+    <!-- 内容由JS渲染 -->
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <h3>北辰青年 AI 实习</h3>
+          <p>让更多年轻人接触 AI、使用 AI、创造 AI。</p>
+        </div>
+        <div class="footer-col">
+          <h4>探索</h4>
+          <a href="discover.html">认识 AI</a>
+          <a href="create.html">使用 AI</a>
+          <a href="collab.html">共创 AI</a>
+          <a href="gallery.html">成果库</a>
+        </div>
+        <div class="footer-col">
+          <h4>了解</h4>
+          <a href="about-program.html">活动介绍</a>
+          <a href="about-program.html#faq">常见问题</a>
+          <a href="about-us.html">关于北辰</a>
+        </div>
+        <div class="footer-col">
+          <h4>参与</h4>
+          <a href="apply.html">立即报名</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 北辰青年 · AI 实习第四期</span>
+        <span>用 AI 创造有意思的东西</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/data/works.js"></script>
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const app = document.getElementById('app');
+
+      if (!id || !window.WORKS_DATA) {
+        renderNotFound();
+        return;
+      }
+
+      const work = window.WORKS_DATA.find(w => w.id === id);
+      if (!work) {
+        renderNotFound();
+        return;
+      }
+
+      const categoryMap = {
+        discover: { name: '认识 AI', color: '#4361EE', bg: '#E8EDFF' },
+        create: { name: '使用 AI', color: '#FF6B35', bg: '#FFF0E8' },
+        collab: { name: '共创 AI', color: '#059669', bg: '#E6FFF7' }
+      };
+      const typeMap = {
+        personal: { name: '个人作品', color: '#7B2CBF' },
+        team: { name: '小组作品', color: '#DB2777' }
+      };
+      const cat = categoryMap[work.category] || categoryMap.discover;
+      const typ = typeMap[work.type] || typeMap.personal;
+
+      // 相关作品（同分类，排除自己）
+      const related = window.WORKS_DATA
+        .filter(w => w.category === work.category && w.id !== work.id)
+        .slice(0, 3);
+
+      app.innerHTML = `
+        <section class="work-detail-hero" style="background:${cat.bg};">
+          <div class="deco-circle" style="width:300px;height:300px;background:${cat.color};top:-100px;right:-50px;"></div>
+          <div class="deco-circle" style="width:200px;height:200px;background:${typ.color};bottom:-50px;left:-30px;"></div>
+          <div class="container">
+            <div class="work-detail-cover" style="background:${work.gradient};">
+              <span>${work.emoji}</span>
+            </div>
+            <div class="work-detail-meta">
+              <span class="type-badge ${work.type === 'personal' ? 'type-personal' : 'type-team'}">${typ.name}</span>
+              <span class="type-badge" style="background:${cat.bg};color:${cat.color};border-color:${cat.color};">${cat.name}</span>
+            </div>
+            <h1 class="work-detail-title">${work.title}</h1>
+            <p class="work-detail-author">by ${work.author}</p>
+            <div class="work-detail-tags">
+              ${work.tags.map(t => `<span class="work-tag" style="color:${cat.color};border-color:${cat.color};background:${cat.bg};">${t}</span>`).join('')}
+            </div>
+          </div>
+        </section>
+
+        <div class="work-detail-body">
+          <div class="work-highlight">
+            <strong>✨ 作品亮点</strong>
+            ${work.highlight}
+          </div>
+          <div class="work-detail-desc">${work.fullDesc || work.desc}</div>
+          <div class="work-cta-group">
+            <a href="${work.url}" target="_blank" rel="noopener" class="btn btn-brutal btn-lg">🔗 访问原作品</a>
+            <a href="gallery.html" class="btn btn-outline btn-lg">← 返回成果库</a>
+          </div>
+          <div class="work-nav">
+            <a href="gallery.html">← 全部作品</a>
+            <a href="apply.html">我也要做一个 →</a>
+          </div>
+        </div>
+
+        ${related.length > 0 ? `
+        <section class="related-section">
+          <div class="container">
+            <h2 style="font-size:28px;font-weight:900;margin-bottom:8px;">同主题作品</h2>
+            <p style="color:#666;">看看同方向的其他人都做了什么</p>
+            <div class="related-grid">
+              ${related.map(w => `
+                <a href="work-detail.html?id=${w.id}" class="work-card" style="text-decoration:none;color:inherit;">
+                  <div class="work-card-cover" style="background:${w.gradient};">
+                    <span class="emoji">${w.emoji}</span>
+                  </div>
+                  <div class="work-card-body">
+                    <h4 class="work-card-title">${w.title}</h4>
+                    <p class="work-card-desc">${w.desc}</p>
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+        ` : ''}
+      `;
+
+      function renderNotFound() {
+        app.innerHTML = `
+          <div class="not-found">
+            <h2>🤔 作品不存在</h2>
+            <p style="color:#666;margin-bottom:24px;">可能链接有误，或者作品已被移除。</p>
+            <a href="gallery.html" class="btn btn-brutal">返回成果库</a>
+          </div>
+        `;
+      }
+    })();
+  </script>
+</body>
+</html>

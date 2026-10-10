@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内容后台 | 北辰青年 AI 实习</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+    .admin-header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .admin-header h1 span { color: #FF6B35; }
+    .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      padding: 8px 16px;
+      border: 2px solid #1a1a2e;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #fff;
+      color: #1a1a2e;
+      transition: all 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: #FF6B35; color: #fff; border-color: #FF6B35; }
+    .btn.danger { background: #EF4444; color: #fff; border-color: #EF4444; }
+    .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,0.3); }
+    .btn.sm { padding: 4px 10px; font-size: 12px; }
+
+    .admin-body {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+    .admin-sidebar {
+      width: 320px;
+      background: #fff;
+      border-right: 1px solid #e5e5e5;
+      overflow-y: auto;
+      max-height: calc(100vh - 60px);
+      position: sticky;
+      top: 60px;
+    }
+    .work-list-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .work-list-item:hover { background: #f9f9f9; }
+    .work-list-item.active { background: #FFF0E8; border-left: 3px solid #FF6B35; }
+    .work-list-emoji {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .work-list-info { flex: 1; min-width: 0; }
+    .work-list-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .work-list-meta {
+      font-size: 11px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .work-list-delete {
+      opacity: 0;
+      transition: opacity 0.2s;
+      color: #EF4444;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .work-list-item:hover .work-list-delete { opacity: 1; }
+
+    .admin-main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #999;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    .form-group label .hint {
+      font-weight: 400;
+      color: #999;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #FF6B35;
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-section {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .form-section h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .preview-cover {
+      width: 100%;
+      height: 160px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      border: 2px solid #1a1a2e;
+      margin-bottom: 12px;
+    }
+
+    /* 导出弹窗 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .modal-body textarea {
+      width: 100%;
+      height: 300px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      padding: 16px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      resize: none;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .export-steps {
+      background: #FFF8E8;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .export-steps ol { padding-left: 20px; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1a1a2e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 300;
+      transition: transform 0.3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .admin-body { flex-direction: column; }
+      .admin-sidebar {
+        width: 100%;
+        max-height: 200px;
+        position: static;
+      }
+      .admin-main { padding: 16px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-header">
+    <h1>🎛️ 北辰 AI 实习 <span>内容后台</span></h1>
+    <div class="admin-actions">
+      <button class="btn ghost" onclick="loadDefault()">重置为默认</button>
+      <button class="btn ghost" onclick="importData()">导入JSON</button>
+      <button class="btn primary" onclick="exportData()">导出配置</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <div class="admin-sidebar">
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+        <button class="btn primary" style="width:100%;" onclick="addWork()">+ 新增作品</button>
+      </div>
+      <div id="workList"></div>
+    </div>
+
+    <div class="admin-main" id="adminMain">
+      <div class="empty-state">
+        <div class="icon">📝</div>
+        <p>选择左侧作品进行编辑，或点击「新增作品」</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出弹窗 -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>导出作品配置</h3>
+        <button class="btn sm" onclick="closeModal()">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="export-steps">
+          <strong>部署步骤：</strong>
+          <ol>
+            <li>复制下方全部代码</li>
+            <li>打开 <code>assets/data/works.js</code> 文件</li>
+            <li>全选替换，保存</li>
+            <li>git push 部署上线</li>
+          </ol>
+        </div>
+        <textarea id="exportText" readonly></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="copyExport()">📋 复制全部</button>
+        <button class="btn primary" onclick="downloadExport()">💾 下载文件</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/data/works.js"></script>
+  <script>
+    let works = [];
+    let currentId = null;
+    const STORAGE_KEY = 'beichen_works_draft';
+
+    // 初始化
+    function init() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try { works = JSON.parse(saved); } catch(e) { works = [...(window.WORKS_DATA || [])]; }
+      } else {
+        works = [...(window.WORKS_DATA || [])];
+      }
+      renderList();
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(works));
+      renderList();
+    }
+
+    function renderList() {
+      const list = document.getElementById('workList');
+      list.innerHTML = works.map(w => `
+        <div class="work-list-item ${w.id === currentId ? 'active' : ''}" onclick="selectWork('${w.id}')">
+          <div class="work-list-emoji" style="background:${w.gradient || '#eee'};">${w.emoji || '📄'}</div>
+          <div class="work-list-info">
+            <div class="work-list-title">${w.title || '未命名'}</div>
+            <div class="work-list-meta">${w.author || ''} · ${w.type === 'team' ? '小组' : '个人'}</div>
+          </div>
+          <span class="work-list-delete" onclick="event.stopPropagation();deleteWork('${w.id}')">×</span>
+        </div>
+      `).join('');
+    }
+
+    function selectWork(id) {
+      currentId = id;
+      const w = works.find(x => x.id === id);
+      if (!w) return;
+      renderList();
+      renderEditor(w);
+    }
+
+    function renderEditor(w) {
+      const main = document.getElementById('adminMain');
+      main.innerHTML = `
+        <div class="form-section">
+          <h3>基本信息</h3>
+          <div class="preview-cover" id="previewCover" style="background:${w.gradient || '#eee'};">${w.emoji || '📄'}</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>作品ID <span class="hint">URL用，英文唯一</span></label>
+              <input value="${w.id || ''}" onchange="updateField('id', this.value)">
+            </div>
+            <div class="form-group">
+              <label>Emoji封面</label>
+              <input value="${w.emoji || ''}" onchange="updateField('emoji', this.value)" placeholder="🐸">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>作品标题</label>
+            <input value="${w.title || ''}" onchange="updateField('title', this.value)">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>作者</label>
+              <input value="${w.author || ''}" onchange="updateField('author', this.value)">
+            </div>
+            <div class="form-group">
+              <label>类型</label>
+              <select onchange="updateField('type', this.value)">
+                <option value="personal" ${w.type === 'personal' ? 'selected' : ''}>个人作品</option>
+                <option value="team" ${w.type === 'team' ? 'selected' : ''}>小组作品</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>所属主题</label>
+              <select onchange="updateField('category', this.value)">
+                <option value="discover" ${w.category === 'discover' ? 'selected' : ''}>认识 AI</option>
+                <option value="create" ${w.category === 'create' ? 'selected' : ''}>使用 AI</option>
+                <option value="collab" ${w.category === 'collab' ? 'selected' : ''}>共创 AI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>封面渐变 <span class="hint">CSS gradient</span></label>
+              <input value="${w.gradient || ''}" onchange="updateField('gradient', this.value)" placeholder="linear-gradient(135deg,#xxx,#xxx)">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>内容描述</h3>
+          <div class="form-group">
+            <label>简短描述 <span class="hint">卡片上显示，50字内</span></label>
+            <textarea onchange="updateField('desc', this.value)">${w.desc || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label>详细描述 <span class="hint">详情页显示</span></label>
+            <textarea style="min-height:120px;" onchange="updateField('fullDesc', this.value)">${w.fullDesc || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label>作品亮点 <span class="hint">一句话概括特色</span></label>
+            <input value="${w.highlight || ''}" onchange="updateField('highlight', this.value)">
+          </div>
+          <div class="form-group">
+            <label>标签 <span class="hint">逗号分隔</span></label>
+            <input value="${(w.tags || []).join(', ')}" onchange="updateField('tags', this.value.split(/[,，]/).map(s=>s.trim()).filter(Boolean))">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>链接</h3>
+          <div class="form-group">
+            <label>原作品URL</label>
+            <input value="${w.url || ''}" onchange="updateField('url', this.value)" placeholder="https://...">
+          </div>
+        </div>
+      `;
+    }
+
+    function updateField(field, value) {
+      const w = works.find(x => x.id === currentId);
+      if (!w) return;
+      w[field] = value;
+      if (field === 'emoji' || field === 'gradient') {
+        const cover = document.getElementById('previewCover');
+        if (cover) {
+          cover.style.background = w.gradient || '#eee';
+          cover.textContent = w.emoji || '📄';
+        }
+      }
+      if (field === 'title' || field === 'author' || field === 'type') {
+        renderList();
+      }
+      save();
+    }
+
+    function addWork() {
+      const id = 'work-' + Date.now();
+      const newWork = {
+        id,
+        title: '新作品',
+        emoji: '✨',
+        gradient: 'linear-gradient(135deg,#E8EDFF,#fff)',
+        category: 'create',
+        type: 'personal',
+        author: '',
+        desc: '',
+        fullDesc: '',
+        tags: [],
+        url: '',
+        highlight: ''
+      };
+      works.push(newWork);
+      currentId = id;
+      save();
+      renderEditor(newWork);
+    }
+
+    function deleteWork(id) {
+      if (!confirm('确定删除这个作品吗？')) return;
+      works = works.filter(w => w.id !== id);
+      if (currentId === id) {
+        currentId = null;
+        document.getElementById('adminMain').innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📝</div>
+            <p>选择左侧作品进行编辑，或点击「新增作品」</p>
+          </div>
+        `;
+      }
+      save();
+    }
+
+    function loadDefault() {
+      if (!confirm('重置为默认数据？当前编辑将丢失。')) return;
+      works = [...(window.WORKS_DATA || [])];
+      localStorage.removeItem(STORAGE_KEY);
+      currentId = null;
+      renderList();
+      document.getElementById('adminMain').innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📝</div>
+          <p>选择左侧作品进行编辑，或点击「新增作品」</p>
+        </div>
+      `;
+      showToast('已重置为默认数据');
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,.js';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            let text = ev.target.result;
+            // 尝试提取JSON数组
+            const match = text.match(/\[[\s\S]*\]/);
+            if (match) text = match[0];
+            const data = JSON.parse(text);
+            if (Array.isArray(data)) {
+              works = data;
+              save();
+              showToast('导入成功，共 ' + data.length + ' 个作品');
+            } else {
+              showToast('格式错误：需要数组');
+            }
+          } catch(err) {
+            showToast('导入失败：' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function exportData() {
+      const jsContent = `/* ============================================
+   作品数据 - 内容后台编辑后替换此文件
+   ============================================ */
+window.WORKS_DATA = ${JSON.stringify(works, null, 2)};
+`;
+      document.getElementById('exportText').value = jsContent;
+      document.getElementById('exportModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('exportModal').classList.remove('show');
+    }
+
+    function copyExport() {
+      const text = document.getElementById('exportText');
+      text.select();
+      document.execCommand('copy');
+      showToast('已复制到剪贴板');
+    }
+
+    function downloadExport() {
+      const content = document.getElementById('exportText').value;
+      const blob = new Blob([content], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'works.js';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('文件已下载');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
