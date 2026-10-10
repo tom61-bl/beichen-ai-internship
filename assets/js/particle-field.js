@@ -565,7 +565,7 @@
     fireworks = fireworks.filter(fw => fw.life > 0);
     fireworks.forEach(fw => { fw.update(); fw.draw(); });
 
-    drawCursor();
+    // drawCursor(); // 已恢复默认鼠标
 
     // 更新鼠标速度
     if (mouse.active) {
@@ -664,8 +664,8 @@
 
   window.addEventListener('resize', resize);
 
-  // 隐藏默认光标
-  canvas.style.cursor = 'none';
+  // 隐藏默认光标（已恢复默认鼠标）
+  // canvas.style.cursor = 'none';
 
   init();
   animate();
