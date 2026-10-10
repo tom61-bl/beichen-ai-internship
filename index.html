@@ -223,6 +223,70 @@
 
     @media (max-width: 900px) {
       .themes-grid { grid-template-columns: 1fr; }
+      .gallery-preview-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .gallery-preview-grid { grid-template-columns: 1fr; }
+    }
+
+    .gallery-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .preview-card {
+      border: 3px solid #1a1a2e;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      background: #fff;
+    }
+    .preview-card:hover {
+      transform: translateY(-6px) rotate(-0.5deg);
+      box-shadow: 6px 6px 0 #1a1a2e;
+    }
+    .preview-card:nth-child(2):hover { transform: translateY(-6px) rotate(0.5deg); }
+    .preview-card:nth-child(4):hover { transform: translateY(-6px) rotate(0.5deg); }
+    .preview-card-cover {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      border-bottom: 3px solid #1a1a2e;
+    }
+    .preview-card-body {
+      padding: 16px 18px;
+    }
+    .preview-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-family: var(--font-serif);
+    }
+    .preview-card-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .preview-card-meta {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .preview-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -331,12 +395,29 @@
       </div>
     </section>
 
+    <!-- 学员作品墙 -->
+    <section class="gallery-preview" style="padding:100px 0;background:#fff;">
+      <div class="container">
+        <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:40px;">
+          <div>
+            <span class="page-header-badge">真实作品</span>
+            <h2 class="section-title" style="margin-bottom:8px;">往期学员<span class="accent">都做了什么</span></h2>
+            <p style="color:#666;font-size:16px;">不用想象，看看他们已经做出来的东西。</p>
+          </div>
+          <a href="gallery.html" class="btn btn-outline">查看全部 →</a>
+        </div>
+        <div class="gallery-preview-grid" id="galleryPreview">
+          <!-- JS渲染 -->
+        </div>
+      </div>
+    </section>
+
     <!-- 需求方向卡片 -->
     <section class="needs-section" style="background:#fafafa;">
       <div class="container">
         <div class="reveal">
           <span class="page-header-badge">你可能在想</span>
-          <h2 class="section-title">6个<span class="accent">常见的你</span></h2>
+          <h2 class="section-title">6个<span class="accent">邪修之路</span></h2>
         </div>
         <div class="needs-grid">
           <a href="discover.html" class="need-card reveal">
@@ -434,5 +515,47 @@
 
   <script src="assets/js/main.js"></script>
   <script src="assets/js/particle-field.js"></script>
+  <script src="assets/data/works.js"></script>
+  <script>
+    // 渲染首页精选作品（取6个）
+    (function() {
+      const container = document.getElementById('galleryPreview');
+      if (!container || !window.WORKS_DATA) return;
+      const featured = window.WORKS_DATA.slice(0, 6);
+      const catMap = {
+        discover: { name: '认识AI', color: '#4361EE', bg: '#E8EDFF' },
+        create: { name: '使用AI', color: '#FF6B35', bg: '#FFF0E8' },
+        collab: { name: '共创AI', color: '#059669', bg: '#E6FFF7' }
+      };
+      container.innerHTML = featured.map(w => {
+        const cat = catMap[w.category] || catMap.create;
+        return `
+          <a href="work-detail.html?id=${w.id}" class="preview-card reveal">
+            <div class="preview-card-cover" style="background:${w.gradient};">${w.emoji}</div>
+            <div class="preview-card-body">
+              <h4 class="preview-card-title">${w.title}</h4>
+              <p class="preview-card-desc">${w.desc}</p>
+              <div class="preview-card-meta">
+                <span class="preview-tag" style="background:${cat.bg};color:${cat.color};">${cat.name}</span>
+                <span class="preview-tag" style="background:#f0f0f0;color:#666;">${w.type === 'team' ? '小组' : '个人'}</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+      // 对新添加的reveal元素启动观察
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      container.querySelectorAll('.reveal').forEach(function(el) {
+        observer.observe(el);
+      });
+    })();
+  </script>
 </body>
 </html>
